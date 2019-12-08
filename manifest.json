@@ -10,7 +10,7 @@
           "*://facebook.com/*",
           "*://*.facebook.com/*",
           "*://*.reddit.com/*",
-          "*://mgsloan.com/start-page/index.html*"
+          "*://mgsloan.com/start-page.html*"
         ],
         "js": ["content.js"],
         "all_frames": true

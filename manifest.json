@@ -1,9 +1,22 @@
 {
     "background": {
         "scripts": [
-            "background.js"
+          "background.js",
+          "password.js"
         ]
     },
+    "content_scripts": [
+      {
+        "matches": [
+          "*://facebook.com/*",
+          "*://*.facebook.com/*",
+          "*://*.reddit.com/*",
+          "*://mgsloan.com/start-page/index.html*"
+        ],
+        "js": ["content.js"],
+        "all_frames": true
+      }
+    ],
     "icons": {
         "128": "icon-128.png",
         "16": "icon-16.png"

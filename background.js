@@ -1,26 +1,42 @@
 const filter = {
   urls: [
-    '*://analytics.google.com/*',
+    '*://*.reddit.com/*',
     '*://facebook.com/*',
-    '*://github.com/',
-    '*://github.com/notifications',
-    '*://news.ycombinator.com/*',
-    '*://twitter.com/*',
-    '*://www.facebook.com/*',
-    '*://www.reddit.com/*',
+    '*://*.facebook.com/*',
   ],
 };
 
 const opt = ['blocking'];
 
-window.chrome.webRequest.onBeforeRequest.addListener(
-  page => {
-    console.log('page blocked - ' + page.url);
-
-    return {
-      cancel: true,
-    };
+chrome.webRequest.onBeforeRequest.addListener(
+  req => {
+    if (req.method === 'GET') {
+      console.log('page blocked - ' + req.method + ' ' + req.url);
+      return {
+        // startPagePassword is defined in password.js
+        redirectUrl: 'https://mgsloan.com/start-page/index.html?pass=' + startPagePassword + '&personal=t&blocked=' + encodeURI(req.url)
+      };
+    } else {
+      console.log('non GET request to blocked page allowed - ' + req.method + ' ' + req.url);
+      return {};
+    }
   },
   filter,
   opt
 );
+
+chrome.runtime.onMessage.addListener(
+  (request, sender, sendResponse) => {
+    switch (request.type) {
+      case 'GET_PAUSE_INFO': {
+        sendResponse({'unblock-time': 1000});
+        break;
+      }
+      case 'PAUSE_BLOCKING': {
+        break;
+      }
+      default: {
+        console.error('Unexpected request: ', request);
+      }
+    }
+  });

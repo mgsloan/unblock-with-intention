@@ -1,14 +1,16 @@
 # Unblock with Intention
 
-This is a simple browser extension which redirects from distracting
-sites to a different page. It has no configuration UI, it is
-configured by modifying the code.
+This is a simple browser extension which redirects away from
+distracting sites. It prompts you to provide an unblock
+justification and time interval.  This way, you can briefly unblock as
+long as you have a constructive intention.
 
-It has a feature which I have not found in other site blockers, which
-is that it allows you to specify a time interval to access a blocked
-domain, and provide a justification.  This way, you can briefly
-unblock as long as you have a constructive intention.  While blocking
-is paused, your intention is displayed at the top of the page.
+![](./images/unblock.png)
+
+While blocking is paused, your intention is displayed at the bottom of
+the page:
+
+![](./images/while-unblocked.png)
 
 The inspiration for this was using a site blocker and finding that I
 would disable it to do something constructive, but then neglect to
@@ -16,7 +18,7 @@ re-enable it.
 
 It is also extremely efficient, adding nearly 0 overhead to normal
 page loads, due to the clever approach in [cirocosta's very simple
-site blocker][https://github.com/cirocosta/site-blocker], which this
+site blocker](https://github.com/cirocosta/site-blocker), which this
 is forked from. See [his
 post](https://ops.tips/blog/extension-to-block-websites/) about the
 topic.

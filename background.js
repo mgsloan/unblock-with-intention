@@ -13,8 +13,7 @@ chrome.webRequest.onBeforeRequest.addListener(
     if (req.method === 'GET') {
       console.log('page blocked - ' + req.method + ' ' + req.url);
       return {
-        // startPagePassword is defined in password.js
-        redirectUrl: 'https://mgsloan.com/start-page/index.html?pass=' + startPagePassword + '&personal=t&blocked=' + encodeURI(req.url)
+        redirectUrl: 'https://mgsloan.com/start-page/index.html?blocked=' + encodeURI(req.url)
       };
     } else {
       console.log('non GET request to blocked page allowed - ' + req.method + ' ' + req.url);

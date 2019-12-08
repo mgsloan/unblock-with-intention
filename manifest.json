@@ -1,8 +1,7 @@
 {
     "background": {
         "scripts": [
-          "background.js",
-          "password.js"
+          "background.js"
         ]
     },
     "content_scripts": [

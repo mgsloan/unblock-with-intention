@@ -1,4 +1,4 @@
-# unblock-with-intent
+# Unblock with Intention
 
 This is a simple browser extension which redirects from distracting
 sites to a different page. It has no configuration UI, it is

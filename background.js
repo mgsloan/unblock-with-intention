@@ -3,6 +3,7 @@ const filter = {
     '*://*.reddit.com/*',
     '*://facebook.com/*',
     '*://*.facebook.com/*',
+    '*://netflix.com/*',
   ],
 };
 

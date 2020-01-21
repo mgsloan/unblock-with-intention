@@ -26,8 +26,12 @@ chrome.webRequest.onBeforeRequest.addListener(
         delete blockInfo[baseDomain];
       }
       console.log('page blocked - ' + req.method + ' ' + req.url);
+      passwordParam = "";
+      if (startPagePassword) {
+        passwordParam = "&personal=t&pass=" + encodeURI(startPagePassword);
+      }
       return {
-        redirectUrl: 'https://mgsloan.com/start-page.html?blocked=' + encodeURI(req.url)
+        redirectUrl: 'https://mgsloan.com/start-page.html?blocked=' + encodeURI(req.url) + passwordParam
       };
     } else {
       console.log('non GET request to blocked page allowed - ' + req.method + ' ' + req.url);

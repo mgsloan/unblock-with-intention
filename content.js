@@ -45,6 +45,7 @@ if (host === 'mgsloan.com') {
     intentionContainerDiv.style.position = 'fixed';
     intentionContainerDiv.style.top = 0;
     intentionContainerDiv.style.width = '100%';
+    intentionContainerDiv.style['pointer-events'] = 'none';
 
     intentionDiv.style.display = 'table'; // for some reason this makes the centering work.
     intentionDiv.style.margin = 'auto';

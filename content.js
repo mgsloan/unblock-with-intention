@@ -43,7 +43,7 @@ if (host === 'mgsloan.com') {
 
     intentionContainerDiv.style['z-index'] = 2147483647
     intentionContainerDiv.style.position = 'fixed';
-    intentionContainerDiv.style.bottom = 0;
+    intentionContainerDiv.style.top = 0;
     intentionContainerDiv.style.width = '100%';
 
     intentionDiv.style.display = 'table'; // for some reason this makes the centering work.
@@ -52,14 +52,14 @@ if (host === 'mgsloan.com') {
     intentionDiv.style.color = 'white';
     intentionDiv.style.borderRadius = '16px';
     intentionDiv.style.padding = '8px';
-    intentionDiv.style.fontSize = '140%';
+    intentionDiv.style.fontSize = '30px';
     intentionDiv.style.fontFamily = 'sans';
 
     timerSpan.style.fontFamily = 'monospace';
     timerSpan.style.marginRight = '1em';
 
     intentionDiv.appendChild(timerSpan);
-    intentionDiv.appendChild(document.createTextNode("Unblock intention: " + intention));
+    intentionDiv.appendChild(document.createTextNode("Intention: " + intention));
     intentionContainerDiv.appendChild(intentionDiv);
     document.body.appendChild(intentionContainerDiv);
 

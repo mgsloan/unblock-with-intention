@@ -37,6 +37,7 @@ if (host === 'mgsloan.com') {
     const expiry = new Date(response.expiry);
     const intention = response.intention;
 
+    const shadowDiv = document.createElement('div');
     const intentionContainerDiv = document.createElement('div');
     const intentionDiv = document.createElement('div');
     const timerSpan = document.createElement('span');
@@ -62,7 +63,10 @@ if (host === 'mgsloan.com') {
     intentionDiv.appendChild(timerSpan);
     intentionDiv.appendChild(document.createTextNode("Intention: " + intention));
     intentionContainerDiv.appendChild(intentionDiv);
-    document.body.appendChild(intentionContainerDiv);
+
+    shadowRoot = shadowDiv.attachShadow({mode: 'closed'});
+    shadowRoot.appendChild(intentionContainerDiv);
+    document.body.appendChild(shadowRoot);
 
     let timer = null;
     const tick = () => {

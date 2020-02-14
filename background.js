@@ -60,15 +60,7 @@ chrome.runtime.onMessage.addListener(
         break;
       }
       case 'UNPAUSE_BLOCKING': {
-        const baseDomain = removeSubdomain(request.hostname);
-        delete blockInfo[baseDomain];
-        const message = { type: 'UNPAUSE_BLOCKING', baseDomain };
-        // TODO: would be better to be more selective.
-        chrome.tabs.query({}, function(tabs) {
-            for (var i=0; i<tabs.length; ++i) {
-                chrome.tabs.sendMessage(tabs[i].id, message);
-            }
-        });
+        unpauseBlocking(request.hostname);
         break;
       }
       default: {
@@ -76,3 +68,29 @@ chrome.runtime.onMessage.addListener(
       }
     }
   });
+
+chrome.commands.onCommand.addListener(function(command) {
+  console.log('Received command:', command);
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    if (tabs.length === 0) {
+      console.error('On command execution there were no active tabs');
+      return;
+    } if (tabs.length > 1) {
+      console.error('On command execution there was more than one active tab');
+    }
+    const tab = tabs[0];
+    unpauseBlocking(new URL(tab.url).hostname)
+  });
+});
+
+function unpauseBlocking(hostname) {
+  const baseDomain = removeSubdomain(hostname);
+  delete blockInfo[baseDomain];
+  const message = { type: 'UNPAUSE_BLOCKING', baseDomain };
+  // TODO: would be better to be more selective.
+  chrome.tabs.query({}, function(tabs) {
+      for (var i=0; i<tabs.length; ++i) {
+          chrome.tabs.sendMessage(tabs[i].id, message);
+      }
+  });
+}

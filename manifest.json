@@ -28,5 +28,14 @@
         "webRequestBlocking",
         "<all_urls>"
     ],
-    "version": "0.0.1"
+    "version": "0.0.1",
+    "commands": {
+      "reblock": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+U",
+          "mac": "Command+Shift+U"
+        },
+        "description": "Indicate that the intention is complete, and blocking should resume."
+      }
+    }
 }

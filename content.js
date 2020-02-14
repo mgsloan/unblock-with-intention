@@ -18,6 +18,8 @@ if (host === 'mgsloan.com') {
           alert('Unblock duration cannot be greater than 60 minutes.');
         } else if (wordCount < 3) {
           alert('Unblock intention must be at least 3 words.');
+        } else if (intention.length < 10) {
+          alert('Unblock intention must be at least 10 characters.');
         } else {
           chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time }, response => {
             if (response === 'REDIRECT') {

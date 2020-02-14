@@ -2,7 +2,8 @@
     "background": {
         "scripts": [
           "password.js",
-          "background.js"
+          "background.js",
+          "shared.js"
         ]
     },
     "content_scripts": [
@@ -13,7 +14,7 @@
           "*://*.reddit.com/*",
           "*://mgsloan.com/start-page.html*"
         ],
-        "js": ["content.js"],
+        "js": ["content.js", "shared.js"],
         "all_frames": true
       }
     ],

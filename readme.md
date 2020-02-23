@@ -28,7 +28,7 @@ topic.
 1. Clone this repository
 
 ```
-$ git clone https://github.com/mgsloan/unblock-with-intent
+$ git clone https://github.com/mgsloan/unblock-with-intention
 ```
 
 2. Add your distraction sites to the url patterns in `background.js`

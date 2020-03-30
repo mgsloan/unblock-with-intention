@@ -20,7 +20,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       if (info) {
         if (new Date() < info.expiry) {
           console.log('blocking paused for', baseDomain, 'so allowing request.');
-          return {}
+          return {};
         }
         console.log('deleting expired blockinfo');
         delete blockInfo[baseDomain];
@@ -79,7 +79,7 @@ chrome.commands.onCommand.addListener(function(command) {
       console.error('On command execution there was more than one active tab');
     }
     const tab = tabs[0];
-    unpauseBlocking(new URL(tab.url).hostname)
+    unpauseBlocking(new URL(tab.url).hostname);
   });
 });
 

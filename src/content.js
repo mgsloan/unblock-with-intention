@@ -62,7 +62,7 @@ if (host === 'mgsloan.com') {
       const doneButtonDiv = document.createElement('div');
       const timerSpan = document.createElement('span');
 
-      intentionContainerDiv.style['z-index'] = 2147483647
+      intentionContainerDiv.style['z-index'] = 2147483647;
       intentionContainerDiv.style.position = 'fixed';
       intentionContainerDiv.style.top = '0';
       intentionContainerDiv.style.width = '100%';

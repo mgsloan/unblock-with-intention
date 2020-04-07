@@ -4,13 +4,53 @@ function redirectToBlockPage() {
   window.location.replace('https://mgsloan.com/start-page.html?blocked=' + encodeURI(window.location));
 }
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
 const host = window.location.hostname;
-if (host === 'mgsloan.com') {
+if (host === 'mgsloan.com' || host === 'localhost') {
   var urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('blocked')) {
     const blockedUrl = urlParams.get('blocked');
     const unblockIntention = document.getElementById('unblock-intention');
     const unblockTime = document.getElementById('unblock-time');
+    const pauseBlocking = (intention, time) => {
+      chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time }, response => {
+        if (response === 'REDIRECT') {
+          window.location.replace(blockedUrl);
+        } else {
+          throw ('Unexpected response from background page: ' + response);
+        }
+      });
+    };
+    const confirmLegitimate = (intention, time) => {
+      const confirmDiv = document.getElementById('unblock-confirm');
+      const confirmIntentionText = document.getElementById('confirm-intention');
+      if (confirmDiv && confirmIntentionText) {
+        confirmIntentionText.innerText = intention;
+        confirmDiv.style.display = 'inline-block';
+        document.addEventListener('keyup', ev => {
+          if (ev.key === 'y') {
+            pauseBlocking(intention, time);
+          } else if (ev.key === 'n') {
+            const unblockDiv = document.getElementById('unblock');
+            const reminderDiv = document.getElementById('unblock-reminder');
+            if (unblockDiv) {
+              unblockDiv.style.display = 'none';
+            }
+            if (reminderDiv) {
+              reminderDiv.style.display = 'none';
+            }
+            document.getElementById('blocked').style.display = 'inline-block';
+            confirmDiv.style.display = 'none';
+          }
+        });
+        return;
+      } else {
+        pauseBlocking(intention, time);
+      }
+    }
     const enterSubmit = ev => {
       if (ev.key === 'Enter') {
         const intention = unblockIntention.value;
@@ -27,13 +67,32 @@ if (host === 'mgsloan.com') {
         } else if (intention.length < 10) {
           alert('Unblock intention must be at least 10 characters.');
         } else {
-          chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time }, response => {
-            if (response === 'REDIRECT') {
-              window.location.replace(blockedUrl);
-            } else {
-              throw ('Unexpected response from background page: ' + response);
+          const prioritiesDiv = document.getElementById('priorities');
+          const unblockDiv = document.getElementById('unblock');
+          const reminderDiv = document.getElementById('unblock-reminder');
+          const reminderText = document.getElementById('unblock-reminder-text');
+          const reminderCounter = document.getElementById('unblock-reminder-counter');
+          if (prioritiesDiv && unblockDiv && reminderDiv && reminderText) {
+            const priorities = prioritiesDiv.getElementsByTagName('li')
+            if (priorities.length > 0) {
+              const priority = priorities[getRandomInt(priorities.length)];
+              reminderText.innerText = priority.innerText;
+              unblockDiv.style.display = 'none';
+              reminderDiv.style.display = 'inline-block';
+              var tick;
+              tick = (count) => () => {
+                reminderCounter.innerText = count.toString();
+                if (count > 0) {
+                  setTimeout(tick(count - 1), 1000);
+                } else {
+                  confirmLegitimate(intention, time);
+                }
+              };
+              tick(5)();
+              return;
             }
-          });
+          }
+          confirmLegitimate(intention, time);
         }
       }
     };

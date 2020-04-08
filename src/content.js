@@ -83,7 +83,8 @@ if (host === 'mgsloan.com' || host === 'localhost') {
               tick = (count) => () => {
                 reminderCounter.innerText = count.toString();
                 if (count > 0) {
-                  setTimeout(tick(count - 1), 1000);
+                  const newCount = document.hasFocus() ? count - 1 : count;
+                  setTimeout(tick(newCount), 1000);
                 } else {
                   confirmLegitimate(intention, time);
                 }

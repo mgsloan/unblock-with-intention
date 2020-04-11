@@ -1,14 +1,3 @@
-const filter = {
-  urls: [
-    '*://*.reddit.com/*',
-    '*://facebook.com/*',
-    '*://*.facebook.com/*',
-    '*://netflix.com/*',
-  ],
-};
-
-const opt = ['blocking'];
-
 const blockInfo = {};
 
 chrome.webRequest.onBeforeRequest.addListener(
@@ -38,8 +27,15 @@ chrome.webRequest.onBeforeRequest.addListener(
       return {};
     }
   },
-  filter,
-  opt
+  {
+    urls: [
+      '*://*.reddit.com/*',
+      '*://facebook.com/*',
+      '*://*.facebook.com/*',
+      '*://netflix.com/*',
+    ]
+  },
+  ['blocking']
 );
 
 chrome.runtime.onMessage.addListener(

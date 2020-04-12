@@ -21,7 +21,7 @@
       "all_frames": true
     }
   ],
-  "icons": null,
+  "icons": {},
   "manifest_version": 2,
   "minimum_chrome_version": "23",
   "name": "Unblock with Intention",

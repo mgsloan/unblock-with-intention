@@ -50,7 +50,7 @@ if (host === 'mgsloan.com' || host === 'localhost') {
       } else {
         pauseBlocking(intention, time);
       }
-    }
+    };
     const enterSubmit = ev => {
       if (ev.key === 'Enter') {
         const intention = unblockIntention.value;
@@ -73,7 +73,7 @@ if (host === 'mgsloan.com' || host === 'localhost') {
           const reminderText = document.getElementById('unblock-reminder-text');
           const reminderCounter = document.getElementById('unblock-reminder-counter');
           if (prioritiesDiv && unblockDiv && reminderDiv && reminderText) {
-            const priorities = prioritiesDiv.getElementsByTagName('li')
+            const priorities = prioritiesDiv.getElementsByTagName('li');
             if (priorities.length > 0) {
               const priority = priorities[getRandomInt(priorities.length)];
               reminderText.innerText = priority.innerText;

@@ -28,7 +28,8 @@
   "permissions": [
     "webRequest",
     "webRequestBlocking",
-    "<all_urls>"
+    "<all_urls>",
+    "storage"
   ],
   "version": "0.0.1",
   "commands": {

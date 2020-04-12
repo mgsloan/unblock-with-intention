@@ -21,3 +21,11 @@ function removeSubdomain(s) {
 
     return parts.join('.');
 };
+
+function stripPrefix(prefix, string) {
+  if (string.startsWith(prefix)) {
+    return s.substr(prefix.length);
+  } else {
+    return null;
+  }
+}

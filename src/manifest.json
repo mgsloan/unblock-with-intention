@@ -1,41 +1,43 @@
 {
-    "background": {
-        "scripts": [
-          "password.js",
-          "background.js",
-          "shared.js"
-        ]
-    },
-    "content_scripts": [
-      {
-        "matches": [
-          "*://facebook.com/*",
-          "*://*.facebook.com/*",
-          "*://*.reddit.com/*",
-          "*://mgsloan.com/start-page.html*"
-        ],
-        "js": ["content.js", "shared.js"],
-        "all_frames": true
-      }
-    ],
-    "icons": {
-    },
-    "manifest_version": 2,
-    "minimum_chrome_version": "23",
-    "name": "Unblock with Intention",
-    "permissions": [
-        "webRequest",
-        "webRequestBlocking",
-        "<all_urls>"
-    ],
-    "version": "0.0.1",
-    "commands": {
-      "reblock": {
-        "suggested_key": {
-          "default": "Ctrl+Shift+U",
-          "mac": "Command+Shift+U"
-        },
-        "description": "Indicate that the intention is complete, and blocking should resume."
-      }
+  "background": {
+    "scripts": [
+      "password.js",
+      "background.js",
+      "shared.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://facebook.com/*",
+        "*://*.facebook.com/*",
+        "*://*.reddit.com/*",
+        "*://mgsloan.com/start-page.html*"
+      ],
+      "js": [
+        "content.js",
+        "shared.js"
+      ],
+      "all_frames": true
     }
+  ],
+  "icons": null,
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "name": "Unblock with Intention",
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "version": "0.0.1",
+  "commands": {
+    "reblock": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+U",
+        "mac": "Command+Shift+U"
+      },
+      "description": "Indicate that the intention is complete, and blocking should resume."
+    }
+  }
 }

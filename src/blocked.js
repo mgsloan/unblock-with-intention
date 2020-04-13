@@ -101,6 +101,8 @@ function confirmLegitimate(intention, time) {
   const confirmDiv = document.getElementById('unblock-confirm');
   const confirmIntentionText = document.getElementById('confirm-intention');
   if (confirmDiv && confirmIntentionText) {
+    unblockIntention.blur();
+    unblockTime.blur();
     confirmIntentionText.innerText = intention;
     confirmDiv.style.display = 'inline-block';
     document.addEventListener('keyup', ev => {

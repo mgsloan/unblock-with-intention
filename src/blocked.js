@@ -59,3 +59,91 @@ async function updateBackground() {
   document.body.style.backgroundImage = 'url("' + url + '")';
 }
 updateBackground();
+
+const blockedUrl = urlParams.get('blocked');
+const unblockIntention = document.getElementById('unblock-intention');
+const unblockTime = document.getElementById('unblock-time');
+const pauseBlocking = (intention, time) => {
+  chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time }, response => {
+    if (response === 'REDIRECT') {
+      window.location.replace(blockedUrl);
+    } else {
+      throw ('Unexpected response from background page: ' + response);
+    }
+  });
+};
+const confirmLegitimate = (intention, time) => {
+  const confirmDiv = document.getElementById('unblock-confirm');
+  const confirmIntentionText = document.getElementById('confirm-intention');
+  if (confirmDiv && confirmIntentionText) {
+    confirmIntentionText.innerText = intention;
+    confirmDiv.style.display = 'inline-block';
+    document.addEventListener('keyup', ev => {
+      if (ev.key === 'y') {
+        pauseBlocking(intention, time);
+      } else if (ev.key === 'n') {
+        const unblockDiv = document.getElementById('unblock');
+        const reminderDiv = document.getElementById('unblock-reminder');
+        if (unblockDiv) {
+          unblockDiv.style.display = 'none';
+        }
+        if (reminderDiv) {
+          reminderDiv.style.display = 'none';
+        }
+        document.getElementById('blocked').style.display = 'inline-block';
+        confirmDiv.style.display = 'none';
+      }
+    });
+    return;
+  } else {
+    pauseBlocking(intention, time);
+  }
+};
+const enterSubmit = ev => {
+  if (ev.key === 'Enter') {
+    const intention = unblockIntention.value;
+    const time = parseInt(unblockTime.value);
+    const wordCount = intention.split(' ').filter(x => x.length > 0).length;
+    if (isNaN(time)) {
+      alert('Unblock duration must be specified.');
+    } else if (time < 0) {
+      alert('Unblock duration cannot be negative.');
+    } else if (time > 60) {
+      alert('Unblock duration cannot be greater than 60 minutes.');
+    } else if (wordCount < 3) {
+      alert('Unblock intention must be at least 3 words.');
+    } else if (intention.length < 10) {
+      alert('Unblock intention must be at least 10 characters.');
+    } else {
+      const prioritiesDiv = document.getElementById('priorities');
+      const unblockDiv = document.getElementById('unblock');
+      const reminderDiv = document.getElementById('unblock-reminder');
+      const reminderText = document.getElementById('unblock-reminder-text');
+      const reminderCounter = document.getElementById('unblock-reminder-counter');
+      if (prioritiesDiv && unblockDiv && reminderDiv && reminderText) {
+        const priorities = prioritiesDiv.getElementsByTagName('li');
+        if (priorities.length > 0) {
+          const priority = priorities[getRandomInt(priorities.length)];
+          reminderText.innerText = priority.innerText;
+          unblockDiv.style.display = 'none';
+          reminderDiv.style.display = 'inline-block';
+          var tick;
+          tick = (count) => () => {
+            reminderCounter.innerText = count.toString();
+            if (count > 0) {
+              const newCount = document.hasFocus() ? count - 1 : count;
+              setTimeout(tick(newCount), 1000);
+            } else {
+              confirmLegitimate(intention, time);
+            }
+          };
+          tick(5)();
+          return;
+        }
+      }
+      confirmLegitimate(intention, time);
+    }
+  }
+};
+unblockIntention.onkeypress = enterSubmit;
+unblockTime.onkeypress = enterSubmit;

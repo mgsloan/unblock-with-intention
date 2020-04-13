@@ -1,12 +1,22 @@
-var urlParams = new URLSearchParams(window.location.search);
-var hasBlocked = urlParams.has('blocked');
-var hasPersonal = urlParams.has('personal');
+const PICSUM_URL = 'https://picsum.photos/1920/1080?random';
 
-// Show site unblocking stuff
-if (hasBlocked) {
+var urlParams = new URLSearchParams(window.location.search);
+var blockedUrl = urlParams.get('blocked');
+
+const blockedDiv = document.getElementById('blocked');
+const unblockIntention = document.getElementById('unblock-intention');
+const unblockTime = document.getElementById('unblock-time');
+
+function initialize() {
+  if (blockedUrl) {
+    populatePage();
+    setKeyPressHandlers();
+  }
+  updateBackground();
+}
+
+function populatePage() {
   document.title = 'Blocked site';
-  const blockedUrl = urlParams.get('blocked');
-  const blockedDiv = document.getElementById('blocked');
   const blockedLink = document.createElement('a');
   blockedLink.href = blockedUrl;
   blockedLink.textContent = blockedUrl;
@@ -25,81 +35,12 @@ if (hasBlocked) {
   };
 }
 
-const picsumUrl = 'https://picsum.photos/1920/1080?random';
-async function getApodUrl() {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  // May as well be friendly to nasa's servers and try to only query apod once a day :)
-  const apodDayRaw = localStorage.getItem('apodDayRaw');
-  if (apodDayRaw) {
-    const apodDay = new Date(apodDayRaw);
-    apodDay.setHours(0,0,0,0);
-    if (apodDay.getTime() == today.getTime()) {
-      console.log('Date match - attempting to use cached apod url');
-      const apodUrl = localStorage.getItem('apodUrl');
-      if (apodUrl) {
-        console.log('Successfully used cached apod url');
-        return apodUrl;
-      }
-    }
-  }
-  const response = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
-  const json = await response.json();
-  const url = json.hdurl;
-  localStorage.setItem('apodDayRaw', today.toString());
-  localStorage.setItem('apodUrl', url);
-  return url;
+function setKeyPressHandlers() {
+  unblockIntention.onkeypress = handleEnterKeyPress;
+  unblockTime.onkeypress = handleEnterKeyPress;
 }
-async function updateBackground() {
-  // let url = Math.random() > 0.5 ? await getApodUrl() : picsumUrl;
-  let url = await getApodUrl();
-  if (url === undefined || url === 'undefined') {
-    url = picsumUrl;
-  }
-  document.body.style.backgroundImage = 'url("' + url + '")';
-}
-updateBackground();
 
-const blockedUrl = urlParams.get('blocked');
-const unblockIntention = document.getElementById('unblock-intention');
-const unblockTime = document.getElementById('unblock-time');
-const pauseBlocking = (intention, time) => {
-  chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time }, response => {
-    if (response === 'REDIRECT') {
-      window.location.replace(blockedUrl);
-    } else {
-      throw ('Unexpected response from background page: ' + response);
-    }
-  });
-};
-const confirmLegitimate = (intention, time) => {
-  const confirmDiv = document.getElementById('unblock-confirm');
-  const confirmIntentionText = document.getElementById('confirm-intention');
-  if (confirmDiv && confirmIntentionText) {
-    confirmIntentionText.innerText = intention;
-    confirmDiv.style.display = 'inline-block';
-    document.addEventListener('keyup', ev => {
-      if (ev.key === 'y') {
-        pauseBlocking(intention, time);
-      } else if (ev.key === 'n') {
-        const unblockDiv = document.getElementById('unblock');
-        const reminderDiv = document.getElementById('unblock-reminder');
-        if (unblockDiv) {
-          unblockDiv.style.display = 'none';
-        }
-        if (reminderDiv) {
-          reminderDiv.style.display = 'none';
-        }
-        document.getElementById('blocked').style.display = 'inline-block';
-        confirmDiv.style.display = 'none';
-      }
-    });
-    return;
-  } else {
-    pauseBlocking(intention, time);
-  }
-};
-const enterSubmit = ev => {
+function handleEnterKeyPress(ev) {
   if (ev.key === 'Enter') {
     const intention = unblockIntention.value;
     const time = parseInt(unblockTime.value);
@@ -144,6 +85,78 @@ const enterSubmit = ev => {
       confirmLegitimate(intention, time);
     }
   }
-};
-unblockIntention.onkeypress = enterSubmit;
-unblockTime.onkeypress = enterSubmit;
+}
+
+function pauseBlocking(intention, time) {
+  chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time }, response => {
+    if (response === 'REDIRECT') {
+      window.location.replace(blockedUrl);
+    } else {
+      throw ('Unexpected response from background page: ' + response);
+    }
+  });
+}
+
+function confirmLegitimate(intention, time) {
+  const confirmDiv = document.getElementById('unblock-confirm');
+  const confirmIntentionText = document.getElementById('confirm-intention');
+  if (confirmDiv && confirmIntentionText) {
+    confirmIntentionText.innerText = intention;
+    confirmDiv.style.display = 'inline-block';
+    document.addEventListener('keyup', ev => {
+      if (ev.key === 'y') {
+        pauseBlocking(intention, time);
+      } else if (ev.key === 'n') {
+        const unblockDiv = document.getElementById('unblock');
+        const reminderDiv = document.getElementById('unblock-reminder');
+        if (unblockDiv) {
+          unblockDiv.style.display = 'none';
+        }
+        if (reminderDiv) {
+          reminderDiv.style.display = 'none';
+        }
+        document.getElementById('blocked').style.display = 'inline-block';
+        confirmDiv.style.display = 'none';
+      }
+    });
+    return;
+  } else {
+    pauseBlocking(intention, time);
+  }
+}
+
+async function getApodUrl() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  // May as well be friendly to nasa's servers and try to only query apod once a day :)
+  const apodDayRaw = localStorage.getItem('apodDayRaw');
+  if (apodDayRaw) {
+    const apodDay = new Date(apodDayRaw);
+    apodDay.setHours(0,0,0,0);
+    if (apodDay.getTime() == today.getTime()) {
+      console.log('Date match - attempting to use cached apod url');
+      const apodUrl = localStorage.getItem('apodUrl');
+      if (apodUrl) {
+        console.log('Successfully used cached apod url');
+        return apodUrl;
+      }
+    }
+  }
+  const response = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
+  const json = await response.json();
+  const url = json.hdurl;
+  localStorage.setItem('apodDayRaw', today.toString());
+  localStorage.setItem('apodUrl', url);
+  return url;
+}
+
+async function updateBackground() {
+  // let url = Math.random() > 0.5 ? await getApodUrl() : PICSUM_URL;
+  let url = await getApodUrl();
+  if (url === undefined || url === 'undefined') {
+    url = picsumUrl;
+  }
+  document.body.style.backgroundImage = 'url("' + url + '")';
+}
+
+initialize();

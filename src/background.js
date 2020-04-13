@@ -81,7 +81,7 @@ function addBeforeRequestListener() {
           passwordParam = "&personal=t&pass=" + encodeURI(startPagePassword);
         }
         return {
-          redirectUrl: 'https://mgsloan.com/start-page.html?blocked=' + encodeURI(req.url) + passwordParam
+          redirectUrl: 'chrome-extension://' + chrome.runtime.id + '/blocked.html?blocked=' + encodeURI(req.url) + passwordParam
         };
       } else {
         console.log('non GET request to blocked page allowed - ' + req.method + ' ' + req.url);

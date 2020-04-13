@@ -1,3 +1,13 @@
+# STATUS: WORK-IN-PROGRESS
+
+In its current state this extension is only really usable by someone
+who wants to edit code to make it do what they want. In particular:
+
+* There are no settings. It's all hardcoded.
+
+* It's also currently entwined with [a page served from my
+  website](https://github.com/mgsloan/mgsloan-site/blob/master/templates/start-page.html).
+
 # Unblock with Intention
 
 This is a simple browser extension which redirects away from

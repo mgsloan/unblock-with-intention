@@ -77,8 +77,8 @@ function addBeforeRequestListener() {
         }
         console.log('page blocked - ' + req.method + ' ' + req.url);
         passwordParam = "";
-        if (window['startPagePassword']) {
-          passwordParam = "&personal=t&pass=" + encodeURI(startPagePassword);
+        if (window['unblockPassword']) {
+          passwordParam = "&personal=t&pass=" + encodeURI(unblockPassword);
         }
         return {
           redirectUrl: 'chrome-extension://' + chrome.runtime.id + '/blocked.html?blocked=' + encodeURI(req.url) + passwordParam

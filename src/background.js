@@ -77,7 +77,7 @@ function addBeforeRequestListener() {
         }
         console.log('page blocked - ' + req.method + ' ' + req.url);
         passwordParam = "";
-        if (startPagePassword) {
+        if (window['startPagePassword']) {
           passwordParam = "&personal=t&pass=" + encodeURI(startPagePassword);
         }
         return {

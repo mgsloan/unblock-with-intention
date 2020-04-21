@@ -16,7 +16,7 @@ function initialize() {
 }
 
 function populatePage() {
-  document.title = 'Blocked site';
+  document.title = blockedUrl;
   const blockedLink = document.createElement('a');
   blockedLink.href = blockedUrl;
   blockedLink.textContent = blockedUrl;

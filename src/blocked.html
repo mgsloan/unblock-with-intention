@@ -8,6 +8,16 @@
       body {
         background-size: contain;
         margin: 0;
+        background-color: #333;
+      }
+
+      /* TODO: media query */
+      #central {
+        width: 800px;
+        margin-left: -400px;
+        position: absolute;
+        top: 0;
+        left: 50%;
       }
 
       #blocked, #unblock, #unblock-reminder, #unblock-confirm {
@@ -45,30 +55,32 @@
 
   </head>
   <body>
-    <!-- Used by my site blocking extension https://github.com/mgsloan/unblock-with-intention -->
-    <div id="blocked"></div>
-    <div id="unblock">
-      <div>
-        Unblock intention?
-        <input id="unblock-intention" type="text"/>
+    <div id="central">
+      <!-- Used by my site blocking extension https://github.com/mgsloan/unblock-with-intention -->
+      <div id="blocked"></div>
+      <div id="unblock">
+        <div>
+          Unblock intention?
+          <input id="unblock-intention" type="text"/>
+        </div>
+        <div>
+          For how long?
+          <input id="unblock-time" type="number" value="5"/>
+          minutes
+        </div>
       </div>
-      <div>
-        For how long?
-        <input id="unblock-time" type="number" value="5"/>
-        minutes
+      <div id="unblock-reminder">
+        <b>Reminder (</b>
+        <span id="unblock-reminder-counter"></span>
+        <b>): </b>
+        <span id="unblock-reminder-text"></span>
       </div>
-    </div>
-    <div id="unblock-reminder">
-      <b>Reminder (</b>
-      <span id="unblock-reminder-counter"></span>
-      <b>): </b>
-      <span id="unblock-reminder-text"></span>
-    </div>
-    <div id="unblock-confirm">
-      <b>Intention: </b>
-      <span id="confirm-intention"></span>
-      <br/>
-      <span>Is this intention <b>legitimate</b>?</span>
+      <div id="unblock-confirm">
+        <b>Intention: </b>
+        <span id="confirm-intention"></span>
+        <br/>
+        <span>Is this intention <b>legitimate</b>?</span>
+      </div>
     </div>
 
     <script src="/blocked.js"></script>

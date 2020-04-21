@@ -1,11 +1,13 @@
 const PICSUM_URL = 'https://picsum.photos/1920/1080?random';
 
-var urlParams = new URLSearchParams(window.location.search);
-var blockedUrl = urlParams.get('blocked');
+const urlParams = new URLSearchParams(window.location.search);
+const blockedUrl = urlParams.get('blocked');
 
 const blockedDiv = document.getElementById('blocked');
 const unblockIntention = document.getElementById('unblock-intention');
 const unblockTime = document.getElementById('unblock-time');
+
+var state = { tag: 'initial' };
 
 function initialize() {
   if (blockedUrl) {
@@ -23,16 +25,38 @@ function populatePage() {
   blockedDiv.style.display = 'inline-block';
   blockedDiv.textContent = 'Blocked ';
   blockedDiv.appendChild(blockedLink);
-  document.onkeyup = ev => {
-    if (ev.key === 'u' && blockedDiv.style.display === 'inline-block') {
-      document.onkeyup = null;
-      blockedDiv.style.display = 'none';
-      const unblockDiv = document.getElementById('unblock');
-      unblockDiv.style.display = 'inline-block';
-      const intentionInput = document.getElementById('unblock-intention');
-      intentionInput.focus();
+  document.onkeyup = keyHandler;
+}
+
+function keyHandler(ev) {
+  const unblockDiv = document.getElementById('unblock');
+  const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
+  switch (state.tag + ' ' + ev.key) {
+  case 'initial u':
+    blockedDiv.style.display = 'none';
+    unblockDiv.style.display = 'inline-block';
+    const intentionInput = document.getElementById('unblock-intention');
+    intentionInput.focus();
+    state = { tag: 'input' };
+    break;
+  case 'confirm y':
+    pauseBlocking(state.intention, state.time);
+    break;
+  case 'confirm n':
+    const confirmDiv = document.getElementById('unblock-confirm');
+    const reminderDiv = document.getElementById('unblock-reminder');
+    if (unblockDiv) {
+      unblockDiv.style.display = 'none';
     }
-  };
+    if (reminderDiv) {
+      reminderDiv.style.display = 'none';
+    }
+    document.getElementById('blocked').style.display = 'inline-block';
+    confirmDiv.style.display = 'none';
+    unblockIntention.value = '';
+    state = { tag: 'initial' };
+    break;
+  }
 }
 
 function setKeyPressHandlers() {
@@ -41,7 +65,8 @@ function setKeyPressHandlers() {
 }
 
 function handleEnterKeyPress(ev) {
-  if (ev.key === 'Enter') {
+  const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
+  if (ev.key === 'Enter' && !someModifier) {
     const intention = unblockIntention.value;
     const time = parseInt(unblockTime.value);
     const wordCount = intention.split(' ').filter(x => x.length > 0).length;
@@ -105,23 +130,7 @@ function confirmLegitimate(intention, time) {
     unblockTime.blur();
     confirmIntentionText.innerText = intention;
     confirmDiv.style.display = 'inline-block';
-    document.addEventListener('keyup', ev => {
-      if (ev.key === 'y') {
-        pauseBlocking(intention, time);
-      } else if (ev.key === 'n') {
-        const unblockDiv = document.getElementById('unblock');
-        const reminderDiv = document.getElementById('unblock-reminder');
-        if (unblockDiv) {
-          unblockDiv.style.display = 'none';
-        }
-        if (reminderDiv) {
-          reminderDiv.style.display = 'none';
-        }
-        document.getElementById('blocked').style.display = 'inline-block';
-        confirmDiv.style.display = 'none';
-      }
-    });
-    return;
+    state = { tag: 'confirm', intention, time };
   } else {
     pauseBlocking(intention, time);
   }

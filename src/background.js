@@ -94,6 +94,9 @@ function addBeforeRequestListener() {
         '*://facebook.com/*',
         '*://*.facebook.com/*',
         '*://netflix.com/*',
+        // Somehow blocking the above sites dredged up slashdot muscle
+        // memory of yore.
+        '*://slashdot.org/*',
       ]
     },
     ['blocking']

@@ -40,6 +40,17 @@ function setBaseDomainInfo(baseDomain, info) {
   storageArea.set({ state: stateString });
 }
 
+function pauseBlocking(baseDomain, intention, minutes, expiry) {
+  const oldInfo = getBaseDomainInfo(baseDomain);
+  var blockReasons = [];
+  if (oldInfo && oldInfo['blockReasons']) {
+    blockReasons = oldInfo.blockReasons;
+  } else {
+    blockReasons.push({ intention, minutes });
+  }
+  setBaseDomainInfo(baseDomain, { intention, expiry, blockReasons });
+}
+
 function addStorageChangeListener() {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'sync') {
@@ -76,13 +87,7 @@ function addBeforeRequestListener() {
           setBaseDomainInfo(baseDomain, null);
         }
         console.log('page blocked - ' + req.method + ' ' + req.url);
-        passwordParam = "";
-        if (window['unblockPassword']) {
-          passwordParam = "&personal=t&pass=" + encodeURI(unblockPassword);
-        }
-        return {
-          redirectUrl: 'chrome-extension://' + chrome.runtime.id + '/blocked.html?blocked=' + encodeURI(req.url) + passwordParam
-        };
+        return { redirectUrl: buildRedirectUrl(req.url) };
       } else {
         console.log('non GET request to blocked page allowed - ' + req.method + ' ' + req.url);
         return {};
@@ -103,20 +108,34 @@ function addBeforeRequestListener() {
   );
 }
 
+function buildRedirectUrl(url) {
+  passwordParam = "";
+  if (window['unblockPassword']) {
+    passwordParam = "&personal=t&pass=" + encodeURI(unblockPassword);
+  }
+  return 'chrome-extension://' + chrome.runtime.id + '/blocked.html?blocked=' + encodeURI(url) + passwordParam;
+}
+
 function addMessageListener() {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Received', request);
     switch (request.type) {
       case 'GET_PAUSE_INFO': {
-        sendResponse(getBaseDomainInfo(removeSubdomain(request.host)));
+        const info = getBaseDomainInfo(removeSubdomain(request.host));
+        sendResponse({ intention: info.intention, time: info.time });
+        break;
+      }
+      case 'GET_BLOCK_INFO': {
+        sendResponse(getBaseDomainInfo(removeSubdomain(request.host));
         break;
       }
       case 'PAUSE_BLOCKING': {
         const baseDomain = removeSubdomain(new URL(request.blockedUrl).hostname);
         const intention = request.intention;
         const now = new Date();
-        const expiry = new Date(now.getTime() + 60000 * parseInt(request.time));
-        setBaseDomainInfo(baseDomain, { intention, expiry });
+        const minutes = parseInt(request.time);
+        const expiry = new Date(now.getTime() + 60000 * minutes);
+        pauseBlocking(baseDomain, intention, minutes, expiry);
         sendResponse('REDIRECT');
         break;
       }

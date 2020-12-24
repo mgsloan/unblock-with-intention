@@ -6,6 +6,7 @@ const blockedUrl = urlParams.get('blocked');
 const blockedDiv = document.getElementById('blocked');
 const unblockIntention = document.getElementById('unblock-intention');
 const unblockTime = document.getElementById('unblock-time');
+const unblockReasonHistory = document.getElementById('unblock-reason-history');
 
 var state = { tag: 'initial' };
 
@@ -26,6 +27,27 @@ function populatePage() {
   blockedDiv.textContent = 'Blocked ';
   blockedDiv.appendChild(blockedLink);
   document.onkeyup = keyHandler;
+  const blockInfoRequest = { type: 'GET_BLOCK_INFO', host: blockedUrl };
+  chrome.runtime.sendMessage(blockInfoRequest, renderBlockInfo);
+}
+
+function renderBlockInfo(info) {
+  const table = document.createElement('table');
+  if (info.blockReasons) {
+    for (reason in info.blockReasons) {
+      row = document.createElement('tr');
+      intentionCol = document.createElement('td');
+      timeCol = document.createElement('td');
+
+      intentionCol.textContent = reason.intention;
+      timeCol.textContent = reason.time;
+
+      row.appendChild(intentionCol);
+      row.appendChild(timeCol);
+      table.appendChild(row);
+    }
+  }
+  unblockReasonHistory.appendChild(table);
 }
 
 function keyHandler(ev) {

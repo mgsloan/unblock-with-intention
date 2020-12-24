@@ -1,8 +1,7 @@
 // TODO: really should allow renewal of time instead of hard
 // redirect, this could suck if in the middle of something.
-function redirectToBlockPage(redirectUrl) {
-  // FIXME: plumb this from background.js
-  window.location.replace('https://mgsloan.com/start-page.html?blocked=' + encodeURI(window.location));
+function redirectToBlockPage(redirectPrefix) {
+  window.location.replace(redirectPrefix + window.location.href);
 }
 
 function getRandomInt(max) {
@@ -16,16 +15,19 @@ if (window.location === window.parent.location) {
     switch (request.type) {
       case 'UNPAUSE_BLOCKING': {
         if (removeSubdomain(window.location.hostname) === request.baseDomain) {
-          redirectToBlockPage();
+          redirectToBlockPage(request.redirectPrefix);
         }
       }
     }
   });
   chrome.runtime.sendMessage({ type: 'GET_PAUSE_INFO', host }, response => {
+    if (!response) {
+      console.warn('unblock-with-intention: null response to GET_PAUSE_INFO');
+      return;
+    }
+
     const expiry = new Date(response.expiry);
     const intention = response.intention;
-
-    // FIXME: use utils from todois-shortcuts.
 
     const shadowDiv = document.createElement('div');
     const intentionContainerDiv = document.createElement('div');
@@ -99,7 +101,7 @@ if (window.location === window.parent.location) {
       const totalExpirySeconds = Math.floor((expiry.getTime() - now.getTime()) / 1000);
       if (totalExpirySeconds < 0) {
         clearInterval(timer);
-        redirectToBlockPage(redirectUrl);
+        redirectToBlockPage(response.redirectPrefix);
         return;
       }
       const expiryMinutes = Math.floor(totalExpirySeconds / 60);

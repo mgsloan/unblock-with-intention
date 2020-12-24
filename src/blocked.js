@@ -4,9 +4,14 @@ const urlParams = new URLSearchParams(window.location.search);
 const blockedUrl = urlParams.get('blocked');
 
 const blockedDiv = document.getElementById('blocked');
+
+const unblockDiv = document.getElementById('unblock');
 const unblockIntention = document.getElementById('unblock-intention');
 const unblockTime = document.getElementById('unblock-time');
 const unblockReasonHistory = document.getElementById('unblock-reason-history');
+
+const confirmDiv = document.getElementById('unblock-confirm');
+const confirmIntentionText = document.getElementById('confirm-intention');
 
 var state = { tag: 'initial' };
 
@@ -27,11 +32,15 @@ function populatePage() {
   blockedDiv.textContent = 'Blocked ';
   blockedDiv.appendChild(blockedLink);
   document.onkeyup = keyHandler;
-  const blockInfoRequest = { type: 'GET_BLOCK_INFO', host: blockedUrl };
+  const blockInfoRequest = { type: 'GET_BLOCK_INFO', blockedUrl };
   chrome.runtime.sendMessage(blockInfoRequest, renderBlockInfo);
 }
 
 function renderBlockInfo(info) {
+  if (!info) {
+    console.warn('No block info for url', blockedUrl);
+    return;
+  }
   const table = document.createElement('table');
   if (info.blockReasons) {
     for (reason in info.blockReasons) {
@@ -51,7 +60,6 @@ function renderBlockInfo(info) {
 }
 
 function keyHandler(ev) {
-  const unblockDiv = document.getElementById('unblock');
   const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
   switch (state.tag + ' ' + ev.key) {
   case 'initial u':
@@ -82,11 +90,11 @@ function keyHandler(ev) {
 }
 
 function setKeyPressHandlers() {
-  unblockIntention.onkeypress = handleEnterKeyPress;
-  unblockTime.onkeypress = handleEnterKeyPress;
+  unblockIntention.onkeypress = handleKeyPress;
+  unblockTime.onkeypress = handleKeyPress;
 }
 
-function handleEnterKeyPress(ev) {
+function handleKeyPress(ev) {
   const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
   if (ev.key === 'Enter' && !someModifier) {
     const intention = unblockIntention.value;
@@ -145,8 +153,6 @@ function pauseBlocking(intention, time) {
 }
 
 function confirmLegitimate(intention, time) {
-  const confirmDiv = document.getElementById('unblock-confirm');
-  const confirmIntentionText = document.getElementById('confirm-intention');
   if (confirmDiv && confirmIntentionText) {
     unblockIntention.blur();
     unblockTime.blur();

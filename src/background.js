@@ -2,14 +2,17 @@ var state = { baseDomainMap: {} };
 const storageArea = chrome.storage.sync;
 
 storageArea.get('state', items => {
-  try {
-    const storedState = JSON.parse(items['state'], stateReviver);
-    if (storedState) {
-      console.log('Restoring state from storage', storedState);
-      state = storedState;
+  const stateJson = items['state'];
+  if (stateJson) {
+    try {
+        const storedState = JSON.parse(items['state'], stateReviver);
+        if (storedState) {
+        console.log('Restoring state from storage', storedState);
+        state = storedState;
+        }
+    } catch (e) {
+        console.error('Error parsing stored state', e, '\nstate = ', stateJson);
     }
-  } catch (e) {
-    console.error('Error parsing stored state', e);
   }
   addBeforeRequestListener();
   // TODO: Does this means there's a race where messages might get
@@ -77,7 +80,6 @@ function addBeforeRequestListener() {
       if (req.method === 'GET') {
         const baseDomain = removeSubdomain(new URL(req.url).hostname);
         const info = getBaseDomainInfo(baseDomain);
-        // console.log('block info = ', info);
         if (info) {
           if (new Date() < info.expiry) {
             // console.log('blocking paused for', baseDomain, 'so allowing request.');
@@ -108,12 +110,11 @@ function addBeforeRequestListener() {
   );
 }
 
+const redirectPrefix =
+  'chrome-extension://' + chrome.runtime.id + '/blocked.html?blocked=';
+
 function buildRedirectUrl(url) {
-  passwordParam = "";
-  if (window['unblockPassword']) {
-    passwordParam = "&personal=t&pass=" + encodeURI(unblockPassword);
-  }
-  return 'chrome-extension://' + chrome.runtime.id + '/blocked.html?blocked=' + encodeURI(url) + passwordParam;
+  return redirectPrefix + encodeURI(url);
 }
 
 function addMessageListener() {
@@ -121,16 +122,27 @@ function addMessageListener() {
     console.log('Received', request);
     switch (request.type) {
       case 'GET_PAUSE_INFO': {
+        console.log('baseDomainMap =', state.baseDomainMap);
         const info = getBaseDomainInfo(removeSubdomain(request.host));
-        sendResponse({ intention: info.intention, time: info.time });
+        if (info) {
+          const response = {
+            intention: info.intention,
+            expiry: info.expiry,
+            redirectPrefix,
+          };
+          console.log('Sending GET_PAUSE_INFO for', request.host, ':', response);
+          sendResponse();
+        } else {
+          sendResponse(null);
+        }
         break;
       }
       case 'GET_BLOCK_INFO': {
-        sendResponse(getBaseDomainInfo(removeSubdomain(request.host));
+        sendResponse(getBaseDomainInfo(urlToBaseDomain(request.blockedUrl)));
         break;
       }
       case 'PAUSE_BLOCKING': {
-        const baseDomain = removeSubdomain(new URL(request.blockedUrl).hostname);
+        const baseDomain = urlToBaseDomain(request.blockedUrl);
         const intention = request.intention;
         const now = new Date();
         const minutes = parseInt(request.time);
@@ -153,23 +165,30 @@ function addMessageListener() {
 function addCommandListener() {
   chrome.commands.onCommand.addListener(function(command) {
     console.log('Received command:', command);
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      if (tabs.length === 0) {
-        console.error('On command execution there were no active tabs');
-        return;
-      } if (tabs.length > 1) {
-        console.error('On command execution there was more than one active tab');
+    switch (command) {
+      case 'reblock': {
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+          if (tabs.length === 0) {
+            console.error('On command execution there were no active tabs');
+            return;
+          } if (tabs.length > 1) {
+            console.error('On command execution there was more than one active tab');
+          }
+          const tab = tabs[0];
+          unpauseBlocking(new URL(tab.url).hostname);
+        });
       }
-      const tab = tabs[0];
-      unpauseBlocking(new URL(tab.url).hostname);
-    });
+      default: {
+        console.error('Unexpected command: ', request);
+      }
+    }
   });
 }
 
 function unpauseBlocking(hostname) {
   const baseDomain = removeSubdomain(hostname);
   setBaseDomainInfo(baseDomain, null);
-  const message = { type: 'UNPAUSE_BLOCKING', baseDomain };
+  const message = { type: 'UNPAUSE_BLOCKING', baseDomain, redirectPrefix };
   // TODO: would be better to be more selective.
   chrome.tabs.query({}, function(tabs) {
       for (var i=0; i<tabs.length; ++i) {

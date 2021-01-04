@@ -74,10 +74,18 @@ function addStorageChangeListener() {
   });
 }
 
+// Rather imprecise regex to determine if it's an oauth
+// request. Modeled after Facebook's oauth url.
+const OAUTH_REGEX = /\/oauth/;
+
 function addBeforeRequestListener() {
   chrome.webRequest.onBeforeRequest.addListener(
     req => {
       if (req.method === 'GET') {
+        if (OAUTH_REGEX.exec(req.url)) {
+          console.log('allowing GET request that seems to involve oauth.');
+          return {};
+        }
         const baseDomain = removeSubdomain(new URL(req.url).hostname);
         const info = getBaseDomainInfo(baseDomain);
         if (info) {

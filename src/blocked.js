@@ -13,6 +13,8 @@ const unblockReasonHistory = document.getElementById('unblock-reason-history');
 const confirmDiv = document.getElementById('unblock-confirm');
 const confirmIntentionText = document.getElementById('confirm-intention');
 
+const externalContentDiv = document.getElementById('external-content');
+
 var state = { tag: 'initial' };
 
 function initialize() {
@@ -20,6 +22,7 @@ function initialize() {
     populatePage();
     setKeyPressHandlers();
   }
+  getExternalContent();
   updateBackground();
 }
 
@@ -162,6 +165,27 @@ function confirmLegitimate(intention, time) {
   } else {
     pauseBlocking(intention, time);
   }
+}
+
+function getExternalContent() {
+  chrome.runtime.sendMessage({ type: 'GET_EXTERNAL_CONTENT' }, (content) => {
+    if (content) {
+      externalContentDiv.innerHTML = content;
+
+      /* TODO: continue resuscitating this old code
+
+      const reminders = document.getElementsByClassName('reminder');
+      const randomReminder = reminders[Math.floor(Math.random() * reminders.length)];
+      randomReminder.style.display = 'inline-block';
+
+      const prioritiesDiv = document.getElementById('priorities');
+      const focusDiv = document.getElementById('focus');
+      const workFocusDiv = document.getElementById('work-focus');
+      prioritiesDiv.style.display = 'inline-block';
+      focusDiv.style.display = 'inline-block';
+      */
+    }
+  });
 }
 
 async function getApodUrl() {

@@ -118,8 +118,8 @@ function addBeforeRequestListener() {
   );
 }
 
-const redirectPrefix =
-  'chrome-extension://' + chrome.runtime.id + '/blocked.html?blocked=';
+const extensionPageOrigin = 'chrome-extension://' + chrome.runtime.id;
+const redirectPrefix = extensionPageOrigin + '/blocked.html?blocked=';
 
 function buildRedirectUrl(url) {
   return redirectPrefix + encodeURI(url);
@@ -127,29 +127,54 @@ function buildRedirectUrl(url) {
 
 function addMessageListener() {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('Received', request);
+    console.log('Received', request, 'from', sender);
+    if (sender.id !== chrome.runtime.id) {
+      console.warn('Ignored request not from same extension');
+      sendResponse(null);
+      return;
+    }
     switch (request.type) {
       case 'GET_PAUSE_INFO': {
-        console.log('baseDomainMap =', state.baseDomainMap);
-        const info = getBaseDomainInfo(removeSubdomain(request.host));
+        const url = sender.url;
+        if (!url) {
+          console.warn('GET_PAUSE_INFO request did not come from a tab - ignoring');
+          sendResponse(null);
+          break;
+        }
+        const info = getBaseDomainInfo(urlToBaseDomain(url));
         if (info) {
           const response = {
             intention: info.intention,
             expiry: info.expiry,
             redirectPrefix,
           };
-          console.log('Sending GET_PAUSE_INFO for', request.host, ':', response);
+          console.log('Sending GET_PAUSE_INFO for', url, ':', response);
           sendResponse(response);
         } else {
+          console.warn('No info for ', url);
           sendResponse(null);
         }
         break;
       }
       case 'GET_BLOCK_INFO': {
+        if (sender.origin !== extensionPageOrigin) {
+          console.warn(
+            'Expected GET_BLOCK_INFO request to come from',
+            extensionPageOrigin, 'not', sender.origin);
+          sendResponse(null);
+          break;
+        }
         sendResponse(getBaseDomainInfo(urlToBaseDomain(request.blockedUrl)));
         break;
       }
       case 'PAUSE_BLOCKING': {
+        if (sender.origin !== extensionPageOrigin) {
+          console.warn(
+            'Expected PAUSE_BLOCKING request to come from',
+            extensionPageOrigin, 'not', sender.origin);
+          sendResponse(null);
+          break;
+        }
         const baseDomain = urlToBaseDomain(request.blockedUrl);
         const intention = request.intention;
         const now = new Date();
@@ -160,7 +185,12 @@ function addMessageListener() {
         break;
       }
       case 'UNPAUSE_BLOCKING': {
-        unpauseBlocking(request.hostname);
+        if (!url) {
+          console.warn('UNPAUSE_BLOCKING request did not come from a tab - ignoring');
+          sendResponse(null);
+          break;
+        }
+        unpauseBlocking(sender.url);
         break;
       }
       default: {
@@ -183,7 +213,7 @@ function addCommandListener() {
             console.error('On command execution there was more than one active tab');
           }
           const tab = tabs[0];
-          unpauseBlocking(new URL(tab.url).hostname);
+          unpauseBlocking(tab.url);
         });
       }
       default: {
@@ -193,8 +223,8 @@ function addCommandListener() {
   });
 }
 
-function unpauseBlocking(hostname) {
-  const baseDomain = removeSubdomain(hostname);
+function unpauseBlocking(url) {
+  const baseDomain = urlToBaseDomain(url);
   setBaseDomainInfo(baseDomain, null);
   const message = { type: 'UNPAUSE_BLOCKING', baseDomain, redirectPrefix };
   // TODO: would be better to be more selective.

@@ -20,7 +20,7 @@ if (window.location === window.parent.location) {
       }
     }
   });
-  chrome.runtime.sendMessage({ type: 'GET_PAUSE_INFO', host }, response => {
+  chrome.runtime.sendMessage({ type: 'GET_PAUSE_INFO' }, response => {
     if (!response) {
       console.warn('unblock-with-intention: null response to GET_PAUSE_INFO');
       return;
@@ -80,7 +80,7 @@ if (window.location === window.parent.location) {
 
     doneButtonDiv.onclick = ev => {
       if (ev.button !== 0) return;
-      chrome.runtime.sendMessage({ type: 'UNPAUSE_BLOCKING', hostname: window.location.hostname });
+      chrome.runtime.sendMessage({ type: 'UNPAUSE_BLOCKING' });
     };
 
     timerSpan.style.fontFamily = 'monospace';

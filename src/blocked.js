@@ -193,7 +193,7 @@ async function updateBackground() {
   // let url = Math.random() > 0.5 ? await getApodUrl() : PICSUM_URL;
   let url = await getApodUrl();
   if (url === undefined || url === 'undefined') {
-    url = picsumUrl;
+    url = PICSUM_URL;
   }
   document.body.style.backgroundImage = 'url("' + url + '")';
 }

@@ -187,7 +187,7 @@ function addCommandListener() {
         });
       }
       default: {
-        console.error('Unexpected command: ', request);
+        console.error('Unexpected command: ', command);
       }
     }
   });

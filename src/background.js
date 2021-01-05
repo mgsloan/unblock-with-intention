@@ -139,7 +139,7 @@ function addMessageListener() {
             redirectPrefix,
           };
           console.log('Sending GET_PAUSE_INFO for', request.host, ':', response);
-          sendResponse();
+          sendResponse(response);
         } else {
           sendResponse(null);
         }

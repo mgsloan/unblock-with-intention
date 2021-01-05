@@ -1,6 +1,8 @@
 var state = { baseDomainMap: {} };
 const storageArea = chrome.storage.sync;
 
+var externalContentDirty = true;
+
 storageArea.get('state', items => {
   const stateJson = items['state'];
   if (stateJson) {
@@ -38,6 +40,22 @@ function setBaseDomainInfo(baseDomain, info) {
   } else {
     delete state.baseDomainMap[baseDomain];
   }
+  persistState();
+}
+
+function getOptions() {
+  if (state.options) {
+    return state.options;
+  }
+  return {};
+}
+
+function setOptions(options) {
+  state.options = options
+  persistState();
+}
+
+function persistState() {
   const stateString = JSON.stringify(state);
   console.log('Setting state to', stateString);
   storageArea.set({ state: stateString });
@@ -133,14 +151,33 @@ function addMessageListener() {
       sendResponse(null);
       return;
     }
+
+    function checkExtensionOrigin() {
+      if (sender.origin !== extensionPageOrigin) {
+        console.warn(
+          'Expected', request.type, 'request to come from',
+          extensionPageOrigin, 'not', sender.origin);
+        sendResponse(null);
+        return false;
+      }
+      return true;
+    }
+
+    function requireTabUrl() {
+      if (!sender.url) {
+        console.warn(request.type, 'request did not come from a tab - ignoring');
+        sendResponse(null);
+        return false;
+      }
+      return true;
+    }
+
     switch (request.type) {
       case 'GET_PAUSE_INFO': {
-        const url = sender.url;
-        if (!url) {
-          console.warn('GET_PAUSE_INFO request did not come from a tab - ignoring');
-          sendResponse(null);
+        if (!requireTabUrl()) {
           break;
         }
+        const url = sender.url;
         const info = getBaseDomainInfo(urlToBaseDomain(url));
         if (info) {
           const response = {
@@ -157,22 +194,13 @@ function addMessageListener() {
         break;
       }
       case 'GET_BLOCK_INFO': {
-        if (sender.origin !== extensionPageOrigin) {
-          console.warn(
-            'Expected GET_BLOCK_INFO request to come from',
-            extensionPageOrigin, 'not', sender.origin);
-          sendResponse(null);
-          break;
+        if (checkExtensionOrigin()) {
+          sendResponse(getBaseDomainInfo(urlToBaseDomain(request.blockedUrl)));
         }
-        sendResponse(getBaseDomainInfo(urlToBaseDomain(request.blockedUrl)));
         break;
       }
       case 'PAUSE_BLOCKING': {
-        if (sender.origin !== extensionPageOrigin) {
-          console.warn(
-            'Expected PAUSE_BLOCKING request to come from',
-            extensionPageOrigin, 'not', sender.origin);
-          sendResponse(null);
+        if (!checkExtensionOrigin()) {
           break;
         }
         const baseDomain = urlToBaseDomain(request.blockedUrl);
@@ -185,12 +213,22 @@ function addMessageListener() {
         break;
       }
       case 'UNPAUSE_BLOCKING': {
-        if (!url) {
-          console.warn('UNPAUSE_BLOCKING request did not come from a tab - ignoring');
-          sendResponse(null);
-          break;
+        if (requireTabUrl()) {
+          unpauseBlocking(sender.url);
         }
-        unpauseBlocking(sender.url);
+        break;
+      }
+      case 'SET_OPTIONS': {
+        if (checkExtensionOrigin()) {
+          setOptions(request.options);
+          externalContentDirty = true;
+        }
+        break;
+      }
+      case 'GET_OPTIONS': {
+        if (checkExtensionOrigin()) {
+          sendResponse(getOptions());
+        }
         break;
       }
       default: {

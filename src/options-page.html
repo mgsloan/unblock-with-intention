@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html style="height: 10em;">
+  <head>
+    <meta charset="utf-8">
+    <title>Unblock With Intention Settings</title>
+  </head>
+  <body>
+    <h1>Unblock With Intention Settings</h1>
+    <h2>Encrypted content source</h2>
+    <p>
+      <span>URL:</span>
+      <input type="text" id="url"/>
+    </p>
+    <p>
+      <span>Staticrypt decryption password:</span>
+      <input type="password" id="password"/>
+    </p>
+    <p>
+      <span>Refetch interval in minutes:</span>
+      <input type="number" id="refresh-minutes" min="1" value="60"/>
+    </p>
+    <p>
+      Notes:
+      <ul>
+        <li>No decryption will be used if password is left blank.</li>
+        <li>Decryption password is stored insecurely in extension storage.</li>
+      </ul>
+    </p>
+    <script src="options-page.js"></script>
+  </body>
+</html>

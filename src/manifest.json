@@ -35,6 +35,10 @@
     "<all_urls>",
     "storage"
   ],
+  "options_ui": {
+    "page": "options-page.html",
+    "open_in_tab": true
+  },
   "version": "0.0.1",
   "commands": {
     "reblock": {

@@ -114,6 +114,7 @@ function handleKeyPress(ev) {
     } else if (intention.length < 10) {
       alert('Unblock intention must be at least 10 characters.');
     } else {
+      /* FIXME broken
       const prioritiesDiv = document.getElementById('priorities');
       const unblockDiv = document.getElementById('unblock');
       const reminderDiv = document.getElementById('unblock-reminder');
@@ -140,6 +141,7 @@ function handleKeyPress(ev) {
           return;
         }
       }
+      */
       confirmLegitimate(intention, time);
     }
   }

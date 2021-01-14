@@ -35,6 +35,7 @@
     "<all_urls>",
     "storage"
   ],
+  "content_security_policy": "default-src 'self'",
   "options_ui": {
     "page": "options-page.html",
     "open_in_tab": true

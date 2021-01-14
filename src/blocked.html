@@ -4,63 +4,7 @@
     <meta charset="utf-8">
     <meta name="referrer" content="no-referrer">
     <title>Blocked site</title>
-    <style>
-      body {
-        background-size: contain;
-        margin: 0;
-        background-color: #333;
-      }
-
-      /* TODO: media query */
-      #central {
-        width: 800px;
-        margin-left: -400px;
-        position: absolute;
-        top: 0;
-        left: 50%;
-      }
-
-      #blocked, #unblock, #unblock-reminder, #unblock-confirm, #unblock-reason-history {
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 32px;
-        color: white;
-        display: none;
-        font-size: 200%;
-        left: 0;
-        margin: 32px;
-        opacity: 1;
-        padding: 32px;
-        position: absolute;
-        top: 124px;
-        z-index: 10;
-      }
-
-      #unblock-confirm {
-        top: 280px !important;
-      }
-
-      #unblock-reason-history {
-        top: 380px !important;
-      }
-
-      #unblock input {
-        filter: invert(100%);
-        font-size: 120%;
-      }
-
-      #unblock-time {
-        width: 2em;
-      }
-
-      a, a:visited {
-        color: #0bf;
-      }
-
-      #external-content {
-        display: none;
-      }
-    </style>
-
+    <link rel="stylesheet" href="blocked.css"/>
   </head>
   <body>
     <div id="central">

@@ -22,6 +22,7 @@
     }
   ],
   "web_accessible_resources": [
+    "blocked.css",
     "blocked.html",
     "blocked.js"
   ],
@@ -35,7 +36,7 @@
     "<all_urls>",
     "storage"
   ],
-  "content_security_policy": "default-src 'self'",
+  "content_security_policy": "default-src 'self' https://api.nasa.gov/planetary/apod; img-src https://apod.nasa.gov/ https://picsum.photos/",
   "options_ui": {
     "page": "options-page.html",
     "open_in_tab": true

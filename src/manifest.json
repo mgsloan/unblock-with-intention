@@ -1,7 +1,6 @@
 {
   "background": {
     "scripts": [
-      "password.js",
       "background.js",
       "shared.js"
     ]

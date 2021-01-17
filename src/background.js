@@ -74,6 +74,21 @@ function pauseBlocking(baseDomain, intention, minutes, expiry) {
   setBaseDomainInfo(baseDomain, { intention, expiry, blockReasons });
 }
 
+function extendUnblock(url) {
+  console.log('extending unblock for', url);
+  const baseDomain = urlToBaseDomain(url);
+  const info = getBaseDomainInfo(baseDomain);
+  info.expiry = new Date(info.expiry.getTime() + 60000);
+  setBaseDomainInfo(baseDomain, info);
+  const message = { type: 'UPDATE_BLOCK_INFO', baseDomain, info };
+  // TODO: would be better to be more selective.
+  chrome.tabs.query({}, function(tabs) {
+    for (var tab of tabs) {
+      chrome.tabs.sendMessage(tab.id, message);
+    }
+  });
+}
+
 function addStorageChangeListener() {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'sync') {
@@ -220,6 +235,12 @@ function addMessageListener() {
         }
         break;
       }
+      case 'EXTEND_UNBLOCK': {
+        if (requireTabUrl()) {
+          extendUnblock(sender.url);
+        }
+        break;
+      }
       case 'SET_OPTIONS': {
         if (checkExtensionOrigin()) {
           setOptions(request.options);
@@ -282,21 +303,29 @@ function addCommandListener() {
     console.log('Received command:', command);
     switch (command) {
       case 'reblock': {
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-          if (tabs.length === 0) {
-            console.error('On command execution there were no active tabs');
-            return;
-          } if (tabs.length > 1) {
-            console.error('On command execution there was more than one active tab');
-          }
-          const tab = tabs[0];
-          unpauseBlocking(tab.url);
-        });
+        withActiveTabUrl(url => unpauseBlocking(url));
+        break;
+      }
+      case 'extend_unblock': {
+        withActiveTabUrl(url => extendUnblock(url));
+        break;
       }
       default: {
         console.error('Unexpected command: ', command);
       }
     }
+  });
+}
+
+function withActiveTabUrl(f) {
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    if (tabs.length === 0) {
+      console.error('On command execution there were no active tabs');
+      return;
+    } if (tabs.length > 1) {
+      console.error('On command execution there was more than one active tab');
+    }
+    f(tabs[0].url);
   });
 }
 
@@ -306,9 +335,9 @@ function unpauseBlocking(url) {
   const message = { type: 'UNPAUSE_BLOCKING', baseDomain, redirectPrefix };
   // TODO: would be better to be more selective.
   chrome.tabs.query({}, function(tabs) {
-      for (var i=0; i<tabs.length; ++i) {
-          chrome.tabs.sendMessage(tabs[i].id, message);
-      }
+    for (var tab of tabs) {
+      chrome.tabs.sendMessage(tab.id, message);
+    }
   });
 }
 

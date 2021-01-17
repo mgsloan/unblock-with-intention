@@ -49,6 +49,13 @@
         "mac": "Command+Shift+U"
       },
       "description": "Indicate that the intention is complete, and blocking should resume."
+    },
+    "extend_unblock": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
+      },
+      "description": "Extend the block time limit by one minute."
     }
   }
 }

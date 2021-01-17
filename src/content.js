@@ -1,3 +1,5 @@
+var expiry;
+
 // TODO: really should allow renewal of time instead of hard
 // redirect, this could suck if in the middle of something.
 function redirectToBlockPage(redirectPrefix) {
@@ -17,6 +19,13 @@ if (window.location === window.parent.location) {
         if (removeSubdomain(window.location.hostname) === request.baseDomain) {
           redirectToBlockPage(request.redirectPrefix);
         }
+        break;
+      }
+      case 'UPDATE_BLOCK_INFO': {
+        if (removeSubdomain(window.location.hostname) === request.baseDomain) {
+          expiry = new Date(request.info.expiry);
+        }
+        break;
       }
     }
   });
@@ -26,13 +35,14 @@ if (window.location === window.parent.location) {
       return;
     }
 
-    const expiry = new Date(response.expiry);
+    expiry = new Date(response.expiry);
     const intention = response.intention;
 
     const shadowDiv = document.createElement('div');
     const intentionContainerDiv = document.createElement('div');
     const intentionDiv = document.createElement('div');
     const doneButtonDiv = document.createElement('div');
+    const extendButtonDiv = document.createElement('div');
     const timerSpan = document.createElement('span');
 
     intentionContainerDiv.style['z-index'] = 2147483647;
@@ -55,7 +65,7 @@ if (window.location === window.parent.location) {
     doneButtonDiv.style.top = '5px';
     doneButtonDiv.style.left = '5px';
     doneButtonDiv.style.border = '1px solid white';
-    doneButtonDiv.style.margin = '0 1em';
+    doneButtonDiv.style.marginRight = '1em';
     doneButtonDiv.style.borderRadius = '0.5em';
     doneButtonDiv.style.padding = '0 0.5em';
     doneButtonDiv.style.boxShadow = '-5px -5px #f99';
@@ -64,30 +74,53 @@ if (window.location === window.parent.location) {
     doneButtonDiv.style.cursor = 'pointer';
     doneButtonDiv.textContent = 'Done';
 
-    doneButtonDiv.onmousedown = ev => {
-      if (ev.button !== 0) return;
-      doneButtonDiv.style.boxShadow = '-1px -1px #f99';
-      doneButtonDiv.style.top = '1px';
-      doneButtonDiv.style.left = '1px';
-    };
+    extendButtonDiv.style.display = 'inline-block';
+    extendButtonDiv.style.position = 'relative';
+    extendButtonDiv.style.top = '5px';
+    extendButtonDiv.style.left = '5px';
+    extendButtonDiv.style.border = '1px solid white';
+    extendButtonDiv.style.margin = '0 1em';
+    extendButtonDiv.style.borderRadius = '0.5em';
+    extendButtonDiv.style.padding = '0 0.5em';
+    extendButtonDiv.style.boxShadow = '-5px -5px #f99';
+    extendButtonDiv.style.userSelect = 'none';
+    extendButtonDiv.style.pointerEvents = 'all';
+    extendButtonDiv.style.cursor = 'pointer';
+    extendButtonDiv.textContent = 'Extend'
 
-    doneButtonDiv.onmouseup = ev => {
-      if (ev.button !== 0) return;
-      doneButtonDiv.style.boxShadow = '-5px -5px #f99';
-      doneButtonDiv.style.top = '5px';
-      doneButtonDiv.style.left = '5px';
-    };
+    for (var buttonYar of [doneButtonDiv, extendButtonDiv]) {
+      const button = buttonYar;
+      button.onmousedown = ev => {
+        if (ev.button !== 0) return;
+        button.style.boxShadow = '-1px -1px #f99';
+        button.style.top = '1px';
+        button.style.left = '1px';
+      };
+
+      button.onmouseup = ev => {
+        if (ev.button !== 0) return;
+        button.style.boxShadow = '-5px -5px #f99';
+        button.style.top = '5px';
+        button.style.left = '5px';
+      };
+    }
 
     doneButtonDiv.onclick = ev => {
       if (ev.button !== 0) return;
       chrome.runtime.sendMessage({ type: 'UNPAUSE_BLOCKING' });
     };
 
+    extendButtonDiv.onclick = ev => {
+      if (ev.button !== 0) return;
+      chrome.runtime.sendMessage({ type: 'EXTEND_UNBLOCK' });
+    }
+
     timerSpan.style.fontFamily = 'monospace';
     timerSpan.style.margin = '0 1em';
 
     intentionDiv.appendChild(timerSpan);
     intentionDiv.appendChild(document.createTextNode("Intention: " + intention));
+    intentionDiv.appendChild(extendButtonDiv);
     intentionDiv.appendChild(doneButtonDiv);
     intentionContainerDiv.appendChild(intentionDiv);
 

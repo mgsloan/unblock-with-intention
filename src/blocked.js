@@ -56,6 +56,9 @@ function changeState(newState) {
   switch (newState.tag) {
   case 'initial':
     blockedDiv.style.display = 'inline-block';
+    unblockIntention.value = '';
+    unblockTime.value = '5';
+    typingInput.value = '';
     break;
   case 'intention':
     unblockDiv.style.display = 'inline-block';
@@ -99,6 +102,9 @@ function renderBlockInfo(info) {
 
 function keyHandler(ev) {
   const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
+  if (ev.key === 'Escape') {
+    changeState({ tag: 'initial' });
+  }
   switch (state.tag) {
   case 'initial':
     if (ev.key === 'u') {
@@ -110,7 +116,6 @@ function keyHandler(ev) {
       pauseBlocking(state.intention, state.time);
       return;
     } else if (ev.key === 'n') {
-      unblockIntention.value = '';
       changeState({ tag: 'initial' });
       return;
     }

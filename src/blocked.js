@@ -15,6 +15,12 @@ const confirmIntentionText = document.getElementById('confirm-intention');
 
 const externalContentDiv = document.getElementById('external-content');
 
+const typingContainer = document.getElementById('unblock-typing');
+const typingPrompt = document.getElementById('typing-prompt');
+const typingInput = document.getElementById('typing-input');
+const editDistanceSpan = document.getElementById('edit-distance');
+const unblockKeySpan = document.getElementById('unblock-key');
+
 var state = { tag: 'initial' };
 
 function initialize() {
@@ -64,31 +70,35 @@ function renderBlockInfo(info) {
 
 function keyHandler(ev) {
   const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
-  switch (state.tag + ' ' + ev.key) {
-  case 'initial u':
-    blockedDiv.style.display = 'none';
-    unblockDiv.style.display = 'inline-block';
-    const intentionInput = document.getElementById('unblock-intention');
-    intentionInput.focus();
-    state = { tag: 'input' };
-    break;
-  case 'confirm y':
-    pauseBlocking(state.intention, state.time);
-    break;
-  case 'confirm n':
-    const confirmDiv = document.getElementById('unblock-confirm');
-    const reminderDiv = document.getElementById('unblock-reminder');
-    if (unblockDiv) {
-      unblockDiv.style.display = 'none';
+  switch (state.tag) {
+  case 'initial':
+    if (ev.key === 'u') {
+      blockedDiv.style.display = 'none';
+      unblockDiv.style.display = 'inline-block';
+      const intentionInput = document.getElementById('unblock-intention');
+      intentionInput.focus();
+      state = { tag: 'input' };
     }
-    if (reminderDiv) {
-      reminderDiv.style.display = 'none';
+    return;
+  case 'confirm':
+    if (ev.key === state.unblockKey) {
+      pauseBlocking(state.intention, state.time);
+      return;
+    } else if (ev.key === 'n') {
+      const confirmDiv = document.getElementById('unblock-confirm');
+      const reminderDiv = document.getElementById('unblock-reminder');
+      if (unblockDiv) {
+        unblockDiv.style.display = 'none';
+      }
+      if (reminderDiv) {
+        reminderDiv.style.display = 'none';
+      }
+      document.getElementById('blocked').style.display = 'inline-block';
+      confirmDiv.style.display = 'none';
+      unblockIntention.value = '';
+      state = { tag: 'initial' };
+      return;
     }
-    document.getElementById('blocked').style.display = 'inline-block';
-    confirmDiv.style.display = 'none';
-    unblockIntention.value = '';
-    state = { tag: 'initial' };
-    break;
   }
 }
 
@@ -114,35 +124,36 @@ function handleKeyPress(ev) {
     } else if (intention.length < 10) {
       alert('Unblock intention must be at least 10 characters.');
     } else {
-      /* FIXME broken
-      const prioritiesDiv = document.getElementById('priorities');
-      const unblockDiv = document.getElementById('unblock');
-      const reminderDiv = document.getElementById('unblock-reminder');
-      const reminderText = document.getElementById('unblock-reminder-text');
-      const reminderCounter = document.getElementById('unblock-reminder-counter');
-      if (prioritiesDiv && unblockDiv && reminderDiv && reminderText) {
-        const priorities = prioritiesDiv.getElementsByTagName('li');
-        if (priorities.length > 0) {
-          const priority = priorities[getRandomInt(priorities.length)];
-          reminderText.innerText = priority.innerText;
-          unblockDiv.style.display = 'none';
-          reminderDiv.style.display = 'inline-block';
-          var tick;
-          tick = (count) => () => {
-            reminderCounter.innerText = count.toString();
-            if (count > 0) {
-              const newCount = document.hasFocus() ? count - 1 : count;
-              setTimeout(tick(newCount), 1000);
-            } else {
-              confirmLegitimate(intention, time);
-            }
-          };
-          tick(5)();
-          return;
-        }
+      askUserToTypePriority();
+    }
+  }
+}
+
+function askUserToTypePriority() {
+  const priorities = getPrioritiesList();
+  if (priorities.length === 0) {
+    unblockDiv.style.display = 'none';
+    confirmLegitimate();
+  } else {
+    unblockDiv.style.display = 'none';
+    typingContainer.style.display = 'inline-block';
+    const priorityIndex = Math.floor(Math.random() * priorities.length);
+    const priorityText = priorities[priorityIndex];
+    typingPrompt.innerText = priorityText;
+    typingInput.onkeypress = handleTypingKeyPress(priorityText);
+    typingInput.focus();
+  }
+}
+
+function handleTypingKeyPress(expectedText) {
+  return (ev) => {
+    const editDistance = getEditDistance(expectedText, typingInput.value);
+    editDistanceSpan.innerText = editDistance;
+    const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
+    if (ev.key === 'Enter' && !someModifier) {
+      if (editDistance < 5) {
+        confirmLegitimate();
       }
-      */
-      confirmLegitimate(intention, time);
     }
   }
 }
@@ -157,13 +168,21 @@ function pauseBlocking(intention, time) {
   });
 }
 
-function confirmLegitimate(intention, time) {
+function confirmLegitimate() {
+  const intention = unblockIntention.value;
+  const time = parseInt(unblockTime.value);
   if (confirmDiv && confirmIntentionText) {
     unblockIntention.blur();
     unblockTime.blur();
     confirmIntentionText.innerText = intention;
+    typingContainer.style.display = 'none';
     confirmDiv.style.display = 'inline-block';
-    state = { tag: 'confirm', intention, time };
+    var unblockKey = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+    if (unblockKey === 'n') {
+      unblockKey = 'y';
+    }
+    unblockKeySpan.innerText = unblockKey;
+    state = { tag: 'confirm', intention, time, unblockKey };
   } else {
     pauseBlocking(intention, time);
   }
@@ -173,21 +192,17 @@ function getExternalContent() {
   chrome.runtime.sendMessage({ type: 'GET_EXTERNAL_CONTENT' }, (content) => {
     if (content) {
       externalContentDiv.innerHTML = content;
-
-      /* TODO: continue resuscitating this old code
-
-      const reminders = document.getElementsByClassName('reminder');
-      const randomReminder = reminders[Math.floor(Math.random() * reminders.length)];
-      randomReminder.style.display = 'inline-block';
-
-      const prioritiesDiv = document.getElementById('priorities');
-      const focusDiv = document.getElementById('focus');
-      const workFocusDiv = document.getElementById('work-focus');
-      prioritiesDiv.style.display = 'inline-block';
-      focusDiv.style.display = 'inline-block';
-      */
     }
   });
+}
+
+function getPrioritiesList() {
+  const priorities = externalContentDiv.getElementsByTagName('li');
+  const result = [];
+  for (const priority of priorities) {
+    result.push(priority.innerText);
+  }
+  return result;
 }
 
 async function getApodUrl() {
@@ -223,5 +238,40 @@ async function updateBackground() {
   }
   document.body.style.backgroundImage = 'url("' + url + '")';
 }
+
+// https://gist.github.com/andrei-m/982927
+function getEditDistance(a, b){
+  if(a.length == 0) return b.length;
+  if(b.length == 0) return a.length;
+
+  var matrix = [];
+
+  // increment along the first column of each row
+  var i;
+  for(i = 0; i <= b.length; i++){
+    matrix[i] = [i];
+  }
+
+  // increment each column in the first row
+  var j;
+  for(j = 0; j <= a.length; j++){
+    matrix[0][j] = j;
+  }
+
+  // Fill in the rest of the matrix
+  for(i = 1; i <= b.length; i++){
+    for(j = 1; j <= a.length; j++){
+      if(b.charAt(i-1) == a.charAt(j-1)){
+        matrix[i][j] = matrix[i-1][j-1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
+                                Math.min(matrix[i][j-1] + 1, // insertion
+                                         matrix[i-1][j] + 1)); // deletion
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+};
 
 initialize();

@@ -21,17 +21,21 @@
           minutes
         </div>
       </div>
-      <div id="unblock-reminder">
-        <b>Reminder (</b>
-        <span id="unblock-reminder-counter"></span>
-        <b>): </b>
-        <span id="unblock-reminder-text"></span>
+      <div id="unblock-typing">
+        <span id="typing-prompt"></span>
+        <div style="margin-top: 1em">
+          <input id="typing-input" type="text" autocomplete="off"></input>
+        </div>
+        <span id="edit-distance"></span>
       </div>
       <div id="unblock-confirm">
         <b>Intention: </b>
         <span id="confirm-intention"></span>
         <br/>
         <span>Is this intention <b>legitimate</b>?</span>
+        <div>
+          <span>If yes, press "</span><span id="unblock-key"></span><span>", otherwise press "n"</span>
+        </div>
       </div>
       <div id="unblock-reason-history">
       </div>

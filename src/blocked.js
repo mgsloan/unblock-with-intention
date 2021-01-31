@@ -26,6 +26,7 @@ var state = { tag: 'initial' };
 function initialize() {
   if (blockedUrl) {
     populatePage();
+    changeState({ tag: 'initial' });
     setKeyPressHandlers();
   }
   getExternalContent();
@@ -37,13 +38,41 @@ function populatePage() {
   const blockedLink = document.createElement('a');
   blockedLink.href = blockedUrl;
   blockedLink.textContent = blockedUrl;
-  blockedDiv.style.display = 'inline-block';
   blockedDiv.textContent = 'Blocked ';
   blockedDiv.appendChild(blockedLink);
   document.onkeyup = keyHandler;
   const blockInfoRequest = { type: 'GET_BLOCK_INFO', blockedUrl };
   chrome.runtime.sendMessage(blockInfoRequest, renderBlockInfo);
 }
+
+function changeState(newState) {
+  blockedDiv.style.display = 'none';
+  unblockDiv.style.display = 'none';
+  confirmDiv.style.display = 'none';
+  typingContainer.style.display = 'none';
+  unblockIntention.blur();
+  unblockTime.blur();
+  typingInput.blur();
+  switch (newState.tag) {
+  case 'initial':
+    blockedDiv.style.display = 'inline-block';
+    break;
+  case 'intention':
+    unblockDiv.style.display = 'inline-block';
+    const intentionInput = document.getElementById('unblock-intention');
+    intentionInput.focus();
+    break;
+  case 'typing':
+    typingContainer.style.display = 'inline-block';
+    typingInput.focus();
+    break;
+  case 'confirm':
+    confirmDiv.style.display = 'inline-block';
+    break;
+  }
+  state = newState;
+}
+
 
 function renderBlockInfo(info) {
   if (!info) {
@@ -73,11 +102,7 @@ function keyHandler(ev) {
   switch (state.tag) {
   case 'initial':
     if (ev.key === 'u') {
-      blockedDiv.style.display = 'none';
-      unblockDiv.style.display = 'inline-block';
-      const intentionInput = document.getElementById('unblock-intention');
-      intentionInput.focus();
-      state = { tag: 'input' };
+      changeState({ tag: 'intention' });
     }
     return;
   case 'confirm':
@@ -85,18 +110,8 @@ function keyHandler(ev) {
       pauseBlocking(state.intention, state.time);
       return;
     } else if (ev.key === 'n') {
-      const confirmDiv = document.getElementById('unblock-confirm');
-      const reminderDiv = document.getElementById('unblock-reminder');
-      if (unblockDiv) {
-        unblockDiv.style.display = 'none';
-      }
-      if (reminderDiv) {
-        reminderDiv.style.display = 'none';
-      }
-      document.getElementById('blocked').style.display = 'inline-block';
-      confirmDiv.style.display = 'none';
       unblockIntention.value = '';
-      state = { tag: 'initial' };
+      changeState({ tag: 'initial' });
       return;
     }
   }
@@ -132,16 +147,13 @@ function handleKeyPress(ev) {
 function askUserToTypePriority() {
   const priorities = getPrioritiesList();
   if (priorities.length === 0) {
-    unblockDiv.style.display = 'none';
     confirmLegitimate();
   } else {
-    unblockDiv.style.display = 'none';
-    typingContainer.style.display = 'inline-block';
     const priorityIndex = Math.floor(Math.random() * priorities.length);
     const priorityText = priorities[priorityIndex];
     typingPrompt.innerText = priorityText;
     typingInput.onkeypress = handleTypingKeyPress(priorityText);
-    typingInput.focus();
+    changeState({ tag: 'typing' });
   }
 }
 
@@ -172,17 +184,13 @@ function confirmLegitimate() {
   const intention = unblockIntention.value;
   const time = parseInt(unblockTime.value);
   if (confirmDiv && confirmIntentionText) {
-    unblockIntention.blur();
-    unblockTime.blur();
     confirmIntentionText.innerText = intention;
-    typingContainer.style.display = 'none';
-    confirmDiv.style.display = 'inline-block';
     var unblockKey = String.fromCharCode(97 + Math.floor(Math.random() * 26));
     if (unblockKey === 'n') {
       unblockKey = 'y';
     }
     unblockKeySpan.innerText = unblockKey;
-    state = { tag: 'confirm', intention, time, unblockKey };
+    changeState({ tag: 'confirm', intention, time, unblockKey });
   } else {
     pauseBlocking(intention, time);
   }

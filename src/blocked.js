@@ -79,7 +79,7 @@ function changeState(newState) {
 
 function renderBlockInfo(info) {
   if (!info) {
-    console.warn('No block info for url', blockedUrl);
+    console.log('No block info for url', blockedUrl);
     return;
   }
   const table = document.createElement('table');

@@ -271,7 +271,7 @@ function addMessageListener() {
           sendResponse(null);
           break;
         }
-        return fetch(state.options.url)
+        fetch(state.options.url)
           .then(response => response.text())
           .then(text => {
             const password = state.options ? state.options.password : null;
@@ -284,12 +284,13 @@ function addMessageListener() {
             if (state.options.refreshMinutes) {
               externalContentExpiry = new Date(now.getTime() + 60000 * state.options.refreshMinutes);
             }
-            return externalContent;
+            sendResponse(externalContent);
           })
           .catch((ex) => {
             console.log('external content fetch exception', ex);
-            throw ex;
+            sendResponse(null);
           });
+        return true;
       }
       default: {
         console.error('Unexpected request: ', request);

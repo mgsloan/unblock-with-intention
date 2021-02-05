@@ -164,7 +164,7 @@ function askUserToTypePriority() {
 
 function handleTypingKeyPress(expectedText) {
   return (ev) => {
-    const editDistance = getEditDistance(expectedText, typingInput.value);
+    const editDistance = getEditDistance(expectedText.toLowerCase(), typingInput.value.toLowerCase());
     editDistanceSpan.innerText = editDistance;
     const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
     if (ev.key === 'Enter' && !someModifier) {

@@ -86,7 +86,7 @@ if (window.location === window.parent.location) {
     extendButtonDiv.style.userSelect = 'none';
     extendButtonDiv.style.pointerEvents = 'all';
     extendButtonDiv.style.cursor = 'pointer';
-    extendButtonDiv.textContent = 'Extend'
+    extendButtonDiv.textContent = 'Extend';
 
     for (var buttonYar of [doneButtonDiv, extendButtonDiv]) {
       const button = buttonYar;
@@ -113,7 +113,7 @@ if (window.location === window.parent.location) {
     extendButtonDiv.onclick = ev => {
       if (ev.button !== 0) return;
       chrome.runtime.sendMessage({ type: 'EXTEND_UNBLOCK' });
-    }
+    };
 
     timerSpan.style.fontFamily = 'monospace';
     timerSpan.style.margin = '0 1em';

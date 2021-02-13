@@ -14,8 +14,8 @@ function initialize() {
   const permissionsInput = document.getElementById('permissions');
   const permissionsButton = document.getElementById('permissions-button');
 
-  urlInput.addEventListener('input', handleChange)
-  passwordInput.addEventListener('input', handleChange)
+  urlInput.addEventListener('input', handleChange);
+  passwordInput.addEventListener('input', handleChange);
   refreshMinutesInput.addEventListener('input', handleChange);
   typingChallengesInput.addEventListener('input', handleChange);
 

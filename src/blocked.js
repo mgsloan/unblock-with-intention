@@ -177,7 +177,7 @@ function handleTypingKeyPress(expectedText) {
         confirmLegitimate();
       }
     }
-  }
+  };
 }
 
 function pauseBlocking(intention, time) {

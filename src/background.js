@@ -55,7 +55,7 @@ function getOptions() {
 }
 
 function setOptions(options) {
-  state.options = options
+  state.options = options;
   persistState();
 }
 
@@ -355,7 +355,7 @@ const ENCRYPTION_KEYSIZE = 256;
 const ENCRYPTION_ITERATIONS = 1000;
 function decrypt(encryptedMsg, pass) {
   var salt = CryptoJS.enc.Hex.parse(encryptedMsg.substr(0, 32));
-  var iv = CryptoJS.enc.Hex.parse(encryptedMsg.substr(32, 32))
+  var iv = CryptoJS.enc.Hex.parse(encryptedMsg.substr(32, 32));
   var encrypted = encryptedMsg.substring(64);
 
   var key = CryptoJS.PBKDF2(pass, salt, {

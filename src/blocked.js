@@ -21,7 +21,8 @@ const typingInput = document.getElementById('typing-input');
 const editDistanceSpan = document.getElementById('edit-distance');
 const unblockKeySpan = document.getElementById('unblock-key');
 
-var state = { tag: 'initial' };
+let state = { tag: 'initial' };
+let options;
 
 function initialize() {
   if (blockedUrl) {
@@ -43,6 +44,9 @@ function populatePage() {
   document.onkeyup = keyHandler;
   const blockInfoRequest = { type: 'GET_BLOCK_INFO', blockedUrl };
   chrome.runtime.sendMessage(blockInfoRequest, renderBlockInfo);
+  chrome.runtime.sendMessage({ type: 'GET_OPTIONS'}, response => {
+    options = response;
+  });
 }
 
 function changeState(newState) {
@@ -166,9 +170,10 @@ function handleTypingKeyPress(expectedText) {
   return (ev) => {
     const editDistance = getEditDistance(expectedText.toLowerCase(), typingInput.value.toLowerCase());
     editDistanceSpan.innerText = editDistance;
+    editDistanceSpan.style.color = editDistance < 6 ? 'lime' : 'red';
     const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
     if (ev.key === 'Enter' && !someModifier) {
-      if (editDistance < 5) {
+      if (editDistance < 6) {
         confirmLegitimate();
       }
     }
@@ -214,6 +219,13 @@ function getPrioritiesList() {
   const result = [];
   for (const priority of priorities) {
     result.push(priority.innerText);
+  }
+  if (options && options.typingChallenges) {
+    for (const challenge of options.typingChallenges.split('\n')) {
+      if (challenge.trim().length != 0) {
+        result.push(challenge);
+      }
+    }
   }
   return result;
 }

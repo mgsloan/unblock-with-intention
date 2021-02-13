@@ -1,9 +1,3 @@
-# STATUS: WORK-IN-PROGRESS
-
-In its current state this extension is only really usable by someone
-who wants to edit code to make it do what they want. In particular,
-there are no settings, even the list of sites to block is hardcoded.
-
 # Unblock with Intention
 
 This is a simple browser extension which redirects away from
@@ -22,14 +16,34 @@ The inspiration for this was using a site blocker and finding that I
 would disable it to do something constructive, but then neglect to
 re-enable it.
 
-It is also extremely efficient, adding nearly 0 overhead to normal
-page loads, due to the clever approach in [cirocosta's very simple
-site blocker](https://github.com/cirocosta/site-blocker), which this
-is forked from. See [his
-post](https://ops.tips/blog/extension-to-block-websites/) about the
-topic.
+## Distinguishing Features
+
+* Intended to work with our psychology to avoid valueless distraction.
+
+    - Requires that you set an intention before unblocking, and
+      defaults to a short time interval.
+
+    - Can require you to type a reminder, to add friction and remind
+      you of some priority / wisdom / quote / value / etc.
+
+    - It then asks you to confirm that the intention is legitimate.
+      The key-press to confirm is randomized to reduce muscle memory
+      of reflexive confirmation, whereas the key-press to deny (`n` or
+      `escape`) is constant.
+
+* Blocking is always on - unblocking is just for exceptional cases
+  where you have a legitimate / constrained use for the site
+
+* Very efficient site blocking via request redirects. The extension's
+  code won't be executed at all for sites that are not blocked. I got
+  this idea from
+  [a blog post](https://ops.tips/blog/extension-to-block-websites/) by
+  [cirocosta](https://github.com/cirocosta/).
 
 ## Usage
+
+I have not yet polished this extension enough to upload it as an
+official browser extension. Here's how to use it:
 
 1. Clone this repository
 
@@ -37,18 +51,24 @@ topic.
 $ git clone https://github.com/mgsloan/unblock-with-intention
 ```
 
-2. Add your distraction sites to the url patterns in `background.js`
-   and in `manifest.json`.
-
-3. Load the extension
+2. Load the extension
 
   - Open chrome
   - Go to chrome://extensions
   - Enable the `Developer mode` toggle in the upper right corner
   - Press `load unpacked extension` and then select this repo
 
-Consider making your own redirect page, and using that instead.  The
-page this extension uses the current [astronomy picture of the
-day](https://apod.nasa.gov/apod/astropix.html) as a background, and
-displays info about the blocked url.  If you press the `u` key, then
-the unblock dialog will appear.
+3. Right click extension icon and click options (or from extension
+   details page).
+
+You can then specify sites to block like this:
+
+```
+*://*.facebook.com/*
+*://*.reddit.com/*
+*://*.youtube.com/*
+*://*.netflix.com/*
+```
+
+You must then press "Set block sites", and it will then ask for
+permissions on these sites.

@@ -49,7 +49,9 @@ function getOptions() {
   if (state.options) {
     return state.options;
   }
-  return {};
+  return {
+    blockPatterns: []
+  };
 }
 
 function setOptions(options) {
@@ -139,18 +141,7 @@ function addBeforeRequestListener() {
       }
     },
     {
-      urls: [
-        '*://*.reddit.com/*',
-        '*://facebook.com/*',
-        '*://*.facebook.com/*',
-        '*://*.youtube.com/*',
-        '*://netflix.com/*',
-        '*://youtube.com/*',
-        '*://*.youtube.com/*',
-        // Somehow blocking the above sites dredged up slashdot muscle
-        // memory of yore.
-        '*://slashdot.org/*',
-      ]
+      urls: getOptions().blockPatterns
     },
     ['blocking']
   );

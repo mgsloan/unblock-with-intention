@@ -18,7 +18,7 @@ storageArea.get('state', items => {
         console.error('Error parsing stored state', e, '\nstate = ', stateJson);
     }
   }
-  addBeforeRequestListener();
+  updateBeforeRequestListener();
   // TODO: Does this means there's a race where messages might get
   // dropped?
   addMessageListener();
@@ -57,6 +57,8 @@ function getOptions() {
 
 function setOptions(options) {
   state.options = options;
+  // TODO: only update listener if blocked urls changed
+  updateBeforeRequestListener();
   persistState();
 }
 
@@ -116,36 +118,38 @@ function addStorageChangeListener() {
 // request. Modeled after Facebook's oauth url.
 const OAUTH_REGEX = /\/oauth/;
 
-function addBeforeRequestListener() {
-  chrome.webRequest.onBeforeRequest.addListener(
-    req => {
-      if (req.method === 'GET') {
-        const baseDomain = removeSubdomain(new URL(req.url).hostname);
-        const info = getBaseDomainInfo(baseDomain);
-        if (info) {
-          if (new Date() < info.expiry) {
-            // console.log('blocking paused for', baseDomain, 'so allowing request.');
-            return {};
-          }
-          console.log('deleting expired domain info');
-          setBaseDomainInfo(baseDomain, null);
-        }
-        if (OAUTH_REGEX.exec(req.url)) {
-          console.log('allowing GET request that seems to involve oauth.');
-          return {};
-        }
-        console.log('page blocked - ' + req.method + ' ' + req.url);
-        return { redirectUrl: buildRedirectUrl(req.url) };
-      } else {
-        console.log('non GET request to blocked page allowed - ' + req.method + ' ' + req.url);
-        return {};
-      }
-    },
+function updateBeforeRequestListener() {
+  chrome.webRequest.onBeforeRequest.removeListener(beforeRequestHandler);
+  chrome.webRequest.onBeforeRequest.addListener(beforeRequestHandler,
     {
       urls: getOptions().blockPatterns
     },
     ['blocking']
   );
+}
+
+function beforeRequestHandler(req) {
+  if (req.method === 'GET') {
+    const baseDomain = removeSubdomain(new URL(req.url).hostname);
+    const info = getBaseDomainInfo(baseDomain);
+    if (info) {
+      if (new Date() < info.expiry) {
+        // console.log('blocking paused for', baseDomain, 'so allowing request.');
+        return {};
+      }
+      console.log('deleting expired domain info');
+      setBaseDomainInfo(baseDomain, null);
+    }
+    if (OAUTH_REGEX.exec(req.url)) {
+      console.log('allowing GET request that seems to involve oauth.');
+      return {};
+    }
+    console.log('page blocked - ' + req.method + ' ' + req.url);
+    return { redirectUrl: buildRedirectUrl(req.url) };
+  } else {
+    console.log('non GET request to blocked page allowed - ' + req.method + ' ' + req.url);
+    return {};
+  }
 }
 
 const extensionPageOrigin = 'chrome-extension://' + chrome.runtime.id;

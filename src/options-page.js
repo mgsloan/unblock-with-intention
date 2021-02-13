@@ -41,12 +41,27 @@
       const blockPatterns =
             permissionsInput.value.split('\n')
             .filter((ln) => ln.trim().length != 0);
-      const permissions = { origins: blockPatterns };
-      chrome.permissions.request(permissions, (granted) => {
-        if (granted) {
-          currentBlockPatterns = blockPatterns;
-          handleChange();
+      const blockPatternsSet = {};
+      for (blockPattern of blockPatterns) {
+        blockPatternsSet[blockPattern] = true;
+      }
+      chrome.permissions.getAll((currentPermissions) => {
+        const originsToRemove = [];
+        if (currentPermissions.origins) {
+          for (const origin of currentPermissions.origins) {
+            if (!(origin in blockPatternsSet)) {
+              originsToRemove.push(origin);
+            }
+          }
         }
+        chrome.permissions.remove({ origins: originsToRemove}, () => {
+          chrome.permissions.request({ origins: blockPatterns }, (granted) => {
+            if (granted) {
+              currentBlockPatterns = blockPatterns;
+              handleChange();
+            }
+          });
+        });
       });
     });
   }

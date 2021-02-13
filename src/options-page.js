@@ -1,23 +1,19 @@
 {
 
-let urlInput;
-let passwordInput;
-let refreshMinutesInput;
-let typingChallengesInput;
-let currentBlockPatterns = [];
+const urlInput = document.getElementById('url');
+const passwordInput = document.getElementById('password');
+const refreshMinutesInput = document.getElementById('refresh-minutes');
+const typingChallengesInput = document.getElementById('typing-challenges');
+const allowExtendInput = document.getElementById('allow-extend');
+const permissionsInput = document.getElementById('permissions');
+const permissionsButton = document.getElementById('permissions-button');
 
 function initialize() {
-  urlInput = document.getElementById('url');
-  passwordInput = document.getElementById('password');
-  refreshMinutesInput = document.getElementById('refresh-minutes');
-  typingChallengesInput = document.getElementById('typing-challenges');
-  const permissionsInput = document.getElementById('permissions');
-  const permissionsButton = document.getElementById('permissions-button');
-
   urlInput.addEventListener('input', handleChange);
   passwordInput.addEventListener('input', handleChange);
   refreshMinutesInput.addEventListener('input', handleChange);
   typingChallengesInput.addEventListener('input', handleChange);
+  allowExtendInput.addEventListener('change', handleChange);
 
   chrome.runtime.sendMessage({ type: 'GET_OPTIONS' }, (options) => {
     if (options.url) {
@@ -28,6 +24,12 @@ function initialize() {
     }
     if (options.refreshMinutes) {
       refreshMinutesInput.value = options.refreshMinutes;
+    }
+    if (options.typingChallenges) {
+      typingChallengesInput.value = options.typingChallenges;
+    }
+    if (options.allowExtend) {
+      allowExtendInput.checked = true;
     }
     if (options.blockPatterns) {
       currentBlockPatterns = options.blockPatterns;
@@ -55,6 +57,7 @@ function handleChange() {
     password: passwordInput.value,
     refreshMinutes: refreshMinutesInput.value,
     typingChallenges: typingChallengesInput.value,
+    allowExtend: allowExtendInput.checked,
     blockPatterns: currentBlockPatterns,
   };
   chrome.runtime.sendMessage({ type: 'SET_OPTIONS', options });

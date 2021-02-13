@@ -50,7 +50,8 @@ function getOptions() {
     return state.options;
   }
   return {
-    blockPatterns: []
+    blockPatterns: [],
+    allowExtend: true,
   };
 }
 
@@ -163,8 +164,12 @@ function addMessageListener() {
       return;
     }
 
+    function isExtensionOrigin() {
+      return sender.origin === extensionPageOrigin;
+    }
+
     function checkExtensionOrigin() {
-      if (sender.origin !== extensionPageOrigin) {
+      if (!isExtensionOrigin()) {
         console.warn(
           'Expected', request.type, 'request to come from',
           extensionPageOrigin, 'not', sender.origin);
@@ -230,7 +235,7 @@ function addMessageListener() {
         break;
       }
       case 'EXTEND_UNBLOCK': {
-        if (requireTabUrl()) {
+        if (requireTabUrl() && getOptions().allowExtend) {
           extendUnblock(sender.url);
         }
         break;
@@ -243,8 +248,10 @@ function addMessageListener() {
         break;
       }
       case 'GET_OPTIONS': {
-        if (checkExtensionOrigin()) {
+        if (isExtensionOrigin()) {
           sendResponse(getOptions());
+        } else {
+          sendResponse({ allowExtend: getOptions().allowExtend });
         }
         break;
       }
@@ -302,7 +309,9 @@ function addCommandListener() {
         break;
       }
       case 'extend_unblock': {
-        withActiveTabUrl(url => extendUnblock(url));
+        if (getOptions().allowExtend) {
+          withActiveTabUrl(url => extendUnblock(url));
+        }
         break;
       }
       default: {

@@ -41,6 +41,7 @@ if (window.location === window.parent.location) {
     const shadowDiv = document.createElement('div');
     const intentionContainerDiv = document.createElement('div');
     const intentionDiv = document.createElement('div');
+    const spacerSpan = document.createElement('span');
     const doneButtonDiv = document.createElement('div');
     const extendButtonDiv = document.createElement('div');
     const timerSpan = document.createElement('span');
@@ -60,6 +61,8 @@ if (window.location === window.parent.location) {
     intentionDiv.style.fontSize = '30px';
     intentionDiv.style.fontFamily = 'sans';
 
+    spacerSpan.style.width = '1em';
+
     doneButtonDiv.style.display = 'inline-block';
     doneButtonDiv.style.position = 'relative';
     doneButtonDiv.style.top = '5px';
@@ -67,8 +70,9 @@ if (window.location === window.parent.location) {
     doneButtonDiv.style.border = '1px solid white';
     doneButtonDiv.style.marginRight = '1em';
     doneButtonDiv.style.borderRadius = '0.5em';
+    doneButtonDiv.style.margin = '0 0.5em';
     doneButtonDiv.style.padding = '0 0.5em';
-    doneButtonDiv.style.boxShadow = '-5px -5px #f99';
+    doneButtonDiv.style.boxShadow = '-5px -5px #ddd';
     doneButtonDiv.style.userSelect = 'none';
     doneButtonDiv.style.pointerEvents = 'all';
     doneButtonDiv.style.cursor = 'pointer';
@@ -79,30 +83,39 @@ if (window.location === window.parent.location) {
     extendButtonDiv.style.top = '5px';
     extendButtonDiv.style.left = '5px';
     extendButtonDiv.style.border = '1px solid white';
-    extendButtonDiv.style.margin = '0 1em';
     extendButtonDiv.style.borderRadius = '0.5em';
+    extendButtonDiv.style.margin = '0 0.5em';
     extendButtonDiv.style.padding = '0 0.5em';
-    extendButtonDiv.style.boxShadow = '-5px -5px #f99';
+    extendButtonDiv.style.boxShadow = '-5px -5px #ddd';
     extendButtonDiv.style.userSelect = 'none';
     extendButtonDiv.style.pointerEvents = 'all';
     extendButtonDiv.style.cursor = 'pointer';
     extendButtonDiv.textContent = 'Extend';
 
-    for (var buttonYar of [doneButtonDiv, extendButtonDiv]) {
-      const button = buttonYar;
-      button.onmousedown = ev => {
+    chrome.runtime.sendMessage({ type: 'GET_OPTIONS' }, (options) => {
+      if (!options.allowExtend) {
+        extendButtonDiv.style.display = 'none';
+      }
+    });
+
+    for (const button of [doneButtonDiv, extendButtonDiv]) {
+      const downHandler = ev => {
         if (ev.button !== 0) return;
-        button.style.boxShadow = '-1px -1px #f99';
+        button.style.boxShadow = '-1px -1px #fff';
         button.style.top = '1px';
         button.style.left = '1px';
       };
 
-      button.onmouseup = ev => {
+      const upHandler = ev => {
         if (ev.button !== 0) return;
-        button.style.boxShadow = '-5px -5px #f99';
+        button.style.boxShadow = '-5px -5px #ddd';
         button.style.top = '5px';
         button.style.left = '5px';
       };
+
+      button.onmousedown = downHandler;
+      button.onmouseup = upHandler;
+      button.onmouseleave = upHandler;
     }
 
     doneButtonDiv.onclick = ev => {
@@ -120,6 +133,7 @@ if (window.location === window.parent.location) {
 
     intentionDiv.appendChild(timerSpan);
     intentionDiv.appendChild(document.createTextNode("Intention: " + intention));
+    intentionDiv.appendChild(spacerSpan);
     intentionDiv.appendChild(extendButtonDiv);
     intentionDiv.appendChild(doneButtonDiv);
     intentionContainerDiv.appendChild(intentionDiv);

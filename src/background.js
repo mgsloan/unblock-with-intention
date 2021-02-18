@@ -29,6 +29,9 @@ function stateReviver(key, value) {
   if (key === 'expiry' && typeof value === 'string') {
     return new Date(value);
   }
+  if (key === 'startTime' && typeof value === 'string') {
+    return new Date(value);
+  }
   return value;
 }
 
@@ -76,7 +79,8 @@ function pauseBlocking(baseDomain, intention, minutes, expiry) {
   } else {
     blockReasons.push({ intention, minutes });
   }
-  setBaseDomainInfo(baseDomain, { intention, expiry, blockReasons });
+  const startTime = new Date();
+  setBaseDomainInfo(baseDomain, { intention, startTime, expiry, blockReasons });
 }
 
 function extendUnblock(url) {
@@ -203,6 +207,7 @@ function addMessageListener() {
           const response = {
             intention: info.intention,
             expiry: info.expiry,
+            startTime: info.startTime,
             redirectPrefix,
           };
           console.log('Sending GET_PAUSE_INFO for', url, ':', response);

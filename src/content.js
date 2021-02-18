@@ -1,5 +1,6 @@
 {
   var expiry;
+  var startTime;
 
   // TODO: really should allow renewal of time instead of hard
   // redirect, this could suck if in the middle of something.
@@ -9,6 +10,15 @@
 
   function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
+  }
+
+  function secondsToTimestamp(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    let seconds = '' + (totalSeconds % 60);
+    if (seconds.length === 1) {
+      seconds = '0' + seconds;
+    }
+    return minutes + ':' + seconds;
   }
 
   const host = window.location.hostname;
@@ -25,6 +35,7 @@
         case 'UPDATE_BLOCK_INFO': {
           if (removeSubdomain(window.location.hostname) === request.baseDomain) {
             expiry = new Date(request.info.expiry);
+            startTime = new Date(request.info.startTime)
           }
           break;
         }
@@ -37,6 +48,7 @@
       }
 
       expiry = new Date(response.expiry);
+      startTime = new Date(response.startTime);
       const intention = response.intention;
 
       const shadowDiv = document.createElement('div');
@@ -146,18 +158,17 @@
       let timer = null;
       const tick = () => {
         const now = new Date();
-        const totalExpirySeconds = Math.floor((expiry.getTime() - now.getTime()) / 1000);
+        const totalExpirySeconds = Math.ceil((expiry.getTime() - now.getTime()) / 1000);
         if (totalExpirySeconds < 0) {
           clearInterval(timer);
           redirectToBlockPage(response.redirectPrefix);
           return;
         }
-        const expiryMinutes = Math.floor(totalExpirySeconds / 60);
-        let expirySeconds = '' + (totalExpirySeconds % 60);
-        if (expirySeconds.length === 1) {
-          expirySeconds = '0' + expirySeconds;
-        }
-        timerSpan.textContent = expiryMinutes + ':' + expirySeconds;
+        const totalUnblockSeconds = Math.ceil((expiry.getTime() - startTime.getTime()) / 1000);
+        timerSpan.textContent =
+          secondsToTimestamp(totalExpirySeconds)
+          + ' / '
+          + secondsToTimestamp(totalUnblockSeconds);
       };
       tick();
       timer = setInterval(tick, 1000);

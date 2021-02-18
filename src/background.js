@@ -123,13 +123,14 @@ function addStorageChangeListener() {
 const OAUTH_REGEX = /\/oauth/;
 
 function updateBeforeRequestListener() {
+  const patterns = getOptions().blockPatterns;
   chrome.webRequest.onBeforeRequest.removeListener(beforeRequestHandler);
-  chrome.webRequest.onBeforeRequest.addListener(beforeRequestHandler,
-    {
-      urls: getOptions().blockPatterns
-    },
-    ['blocking']
-  );
+  if (patterns.length > 0) {
+    chrome.webRequest.onBeforeRequest.addListener(beforeRequestHandler,
+      { urls: patterns },
+      ['blocking']
+    );
+  }
 }
 
 function beforeRequestHandler(req) {

@@ -35,7 +35,7 @@
         case 'UPDATE_BLOCK_INFO': {
           if (removeSubdomain(window.location.hostname) === request.baseDomain) {
             expiry = new Date(request.info.expiry);
-            startTime = new Date(request.info.startTime)
+            startTime = new Date(request.info.startTime);
           }
           break;
         }

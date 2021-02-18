@@ -135,6 +135,10 @@ function updateBeforeRequestListener() {
 function beforeRequestHandler(req) {
   if (req.method === 'GET') {
     const baseDomain = removeSubdomain(new URL(req.url).hostname);
+    // Don't block extension pages.
+    if (baseDomain === 'extension') {
+      return {};
+    }
     const info = getBaseDomainInfo(baseDomain);
     if (info) {
       if (new Date() < info.expiry) {

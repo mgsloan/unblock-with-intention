@@ -40,6 +40,10 @@ body {
   font-family: 'sans-serif';
 }
 
+#typing-prompt {
+  user-select: none;
+}
+
 #typing-input {
   filter: invert(100%);
   margin-left: -4px;

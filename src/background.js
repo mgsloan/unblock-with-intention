@@ -71,7 +71,7 @@ function persistState() {
   storageArea.set({ state: stateString });
 }
 
-function pauseBlocking(baseDomain, intention, minutes, expiry) {
+function pauseBlocking(baseDomain, intention, minutes, expiry, allowExtension) {
   const oldInfo = getBaseDomainInfo(baseDomain);
   var blockReasons = [];
   if (oldInfo && oldInfo['blockReasons']) {
@@ -80,7 +80,7 @@ function pauseBlocking(baseDomain, intention, minutes, expiry) {
     blockReasons.push({ intention, minutes });
   }
   const startTime = new Date();
-  setBaseDomainInfo(baseDomain, { intention, startTime, expiry, blockReasons });
+  setBaseDomainInfo(baseDomain, { intention, startTime, expiry, allowExtension, blockReasons });
 }
 
 function extendUnblock(url) {
@@ -213,6 +213,7 @@ function addMessageListener() {
             intention: info.intention,
             expiry: info.expiry,
             startTime: info.startTime,
+            allowExtension: info.allowExtension,
             redirectPrefix,
           };
           console.log('Sending GET_PAUSE_INFO for', url, ':', response);
@@ -238,7 +239,8 @@ function addMessageListener() {
         const now = new Date();
         const minutes = parseInt(request.time);
         const expiry = new Date(now.getTime() + 60000 * minutes);
-        pauseBlocking(baseDomain, intention, minutes, expiry);
+        const allowExtension = request.allowExtension;
+        pauseBlocking(baseDomain, intention, minutes, expiry, allowExtension);
         sendResponse('REDIRECT');
         break;
       }

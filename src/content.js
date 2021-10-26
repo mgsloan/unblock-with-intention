@@ -147,7 +147,9 @@
       intentionDiv.appendChild(timerSpan);
       intentionDiv.appendChild(document.createTextNode("Intention: " + intention));
       intentionDiv.appendChild(spacerSpan);
-      intentionDiv.appendChild(extendButtonDiv);
+      if (response.allowExtension) {
+        intentionDiv.appendChild(extendButtonDiv);
+      }
       intentionDiv.appendChild(doneButtonDiv);
       intentionContainerDiv.appendChild(intentionDiv);
 

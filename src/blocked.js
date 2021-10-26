@@ -117,7 +117,8 @@ function keyHandler(ev) {
     return;
   case 'confirm':
     if (ev.key === state.unblockKey) {
-      pauseBlocking(state.intention, state.time);
+      const allowExtension = document.getElementById('allow-extension').checked;
+      pauseBlocking(state.intention, state.time, allowExtension);
       return;
     } else if (ev.key === 'n') {
       changeState({ tag: 'initial' });
@@ -180,8 +181,8 @@ function handleTypingKeyPress(expectedText) {
   };
 }
 
-function pauseBlocking(intention, time) {
-  chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time }, response => {
+function pauseBlocking(intention, time, allowExtension) {
+  chrome.runtime.sendMessage({ type: 'PAUSE_BLOCKING', blockedUrl, intention, time, allowExtension}, response => {
     if (response === 'REDIRECT') {
       window.location.replace(blockedUrl);
     } else {

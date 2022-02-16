@@ -45,6 +45,7 @@
       for (blockPattern of blockPatterns) {
         blockPatternsSet[blockPattern] = true;
       }
+      blockPatternsSet["http://placeholder-url.invalid/*"] = true;
       chrome.permissions.getAll((currentPermissions) => {
         const originsToRemove = [];
         if (currentPermissions.origins) {

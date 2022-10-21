@@ -15,7 +15,7 @@ body {
   left: 50%;
 }
 
-#blocked, #unblock, #unblock-typing, #unblock-confirm, #unblock-reason-history {
+#blocked, #unblock, #unblock-typing, #unblock-confirm, #unblock-reason-history, #clock {
   background: rgba(0, 0, 0, 0.5);
   border-radius: 32px;
   color: white;
@@ -67,4 +67,38 @@ a, a:visited {
 
 #external-content {
   display: none;
+}
+
+/* major-mono-display-regular - latin */
+@font-face {
+  font-family: 'Major Mono Display';
+  font-style: normal;
+  font-weight: 400;
+  src: url('major-mono/font.ttf');
+}
+
+#clock {
+  display: block;
+  top: 0;
+  left: auto;
+  right: 0;
+  font-family: Major Mono Display, monospace;
+  font-size: 275%;
+}
+
+#clock.clock-late {
+  color: red;
+  font-weight: 800;
+  animation-name: blinker;
+  animation-duration: 1.2s;
+  animation-iteration-count: infinite;
+}
+
+
+@keyframes blinker {
+  from { opacity: 1.0; }
+  40% { opacity: 0.9; transform: rotate(-2deg); }
+  50% { opacity: 0.5; transform: rotate(5deg); }
+  60% { opacity: 0.9; transform: rotate(0deg); }
+  to { opacity: 1.0; }
 }

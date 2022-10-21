@@ -13,6 +13,8 @@ const unblockReasonHistory = document.getElementById('unblock-reason-history');
 const confirmDiv = document.getElementById('unblock-confirm');
 const confirmIntentionText = document.getElementById('confirm-intention');
 
+const clockDiv = document.getElementById('clock');
+
 const externalContentDiv = document.getElementById('external-content');
 
 const typingContainer = document.getElementById('unblock-typing');
@@ -32,6 +34,8 @@ function initialize() {
   }
   getExternalContent();
   updateBackground();
+  updateClock();
+  setInterval(updateClock, 1000);
 }
 
 function populatePage() {
@@ -263,6 +267,19 @@ async function updateBackground() {
     url = PICSUM_URL;
   }
   document.body.style.backgroundImage = 'url("' + url + '")';
+}
+
+function updateClock() {
+  const now = new Date();
+  clockDiv.innerText =
+    now.getHours().toString().padStart(2, '0') + ":" +
+    now.getMinutes().toString().padStart(2, '0') + ":" +
+    now.getSeconds().toString().padStart(2, '0');
+  if (now.getHours() > 22 || now.getHours() < 5) {
+    clockDiv.classList.add('clock-late');
+  } else {
+    clockDiv.classList.remove('clock-late');
+  }
 }
 
 // https://gist.github.com/andrei-m/982927

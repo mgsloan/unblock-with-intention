@@ -61,7 +61,7 @@
 
       intentionContainerDiv.style['z-index'] = 2147483647;
       intentionContainerDiv.style.position = 'fixed';
-      intentionContainerDiv.style.top = '0';
+      intentionContainerDiv.style.bottom = '32px';
       intentionContainerDiv.style.width = '100%';
       intentionContainerDiv.style.pointerEvents = 'none';
 

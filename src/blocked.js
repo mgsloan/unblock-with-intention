@@ -166,23 +166,22 @@ function askUserToTypePriority() {
     const priorityIndex = Math.floor(Math.random() * priorities.length);
     const priorityText = priorities[priorityIndex];
     typingPrompt.innerText = priorityText;
-    typingInput.onkeypress = handleTypingKeyPress(priorityText);
+    let editDistance = 100;
+    typingInput.oninput = (ev) => {
+      editDistance = getEditDistance(priorityText.toLowerCase(), typingInput.value.toLowerCase());
+      editDistanceSpan.innerText = editDistance < 6 ? editDistance + ' (press enter)' : editDistance;
+      editDistanceSpan.style.color = editDistance < 6 ? 'lime' : 'red';
+    };
+    typingInput.onkeypress = (ev) => {
+      const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
+      if (ev.key === 'Enter' && !someModifier) {
+        if (editDistance < 6) {
+          confirmLegitimate();
+        }
+      }
+    };
     changeState({ tag: 'typing' });
   }
-}
-
-function handleTypingKeyPress(expectedText) {
-  return (ev) => {
-    const editDistance = getEditDistance(expectedText.toLowerCase(), typingInput.value.toLowerCase());
-    editDistanceSpan.innerText = editDistance < 6 ? editDistance + ' (press enter)' : editDistance;
-    editDistanceSpan.style.color = editDistance < 6 ? 'lime' : 'red';
-    const someModifier = ev.altKey || ev.ctrlKey || ev.metaKey;
-    if (ev.key === 'Enter' && !someModifier) {
-      if (editDistance < 6) {
-        confirmLegitimate();
-      }
-    }
-  };
 }
 
 function pauseBlocking(intention, time, allowExtension) {

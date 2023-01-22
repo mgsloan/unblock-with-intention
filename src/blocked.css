@@ -71,10 +71,11 @@ a, a:visited {
 
 /* major-mono-display-regular - latin */
 @font-face {
-  font-family: 'Major Mono Display';
+  font-family: 'Major Mono Display Clock';
   font-style: normal;
   font-weight: 400;
-  src: url('major-mono/font.ttf');
+  src: url('major-mono/clock-subset.woff') format('woff');
+
 }
 
 #clock {
@@ -82,7 +83,7 @@ a, a:visited {
   top: 0;
   left: auto;
   right: 0;
-  font-family: Major Mono Display, monospace;
+  font-family: Major Mono Display Clock, monospace;
   font-size: 275%;
 }
 

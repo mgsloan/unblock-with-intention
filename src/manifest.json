@@ -55,5 +55,11 @@
       },
       "description": "Extend the block time limit by one minute."
     }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{0d97397f-0b5a-4691-b9c2-0b9ff8774ad}",
+      "strict_min_version": "57.0"
+    }
   }
 }

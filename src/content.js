@@ -1,4 +1,12 @@
-{
+(function () {
+  const GLOBAL_TO_PREVENT_REINTRY = 'UNBLOCK_WITH_INTENTION_ENTERED';
+  if (window[GLOBAL_TO_PREVENT_REINTRY]) {
+    console.warn('Unblock with intention content script already entered - skipping redundant entry.');
+    return;
+  } else {
+    window[GLOBAL_TO_PREVENT_REINTRY] = true;
+  }
+
   var expiry;
   var startTime;
 
@@ -176,4 +184,4 @@
       timer = setInterval(tick, 1000);
     });
   }
-}
+})();

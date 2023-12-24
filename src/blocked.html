@@ -4,14 +4,15 @@
     <meta charset="utf-8">
     <meta name="referrer" content="no-referrer">
     <title>Blocked site</title>
+    <link rel="stylesheet" href="shared.css"/>
     <link rel="stylesheet" href="blocked.css"/>
     <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
   </head>
   <body>
     <div id="central">
       <!-- Used by my site blocking extension https://github.com/mgsloan/unblock-with-intention -->
-      <div id="blocked"></div>
-      <div id="unblock">
+      <div id="blocked" class="block"></div>
+      <div id="unblock" class="block">
         <div>
           Unblock intention?
           <input id="unblock-intention" type="text" autocomplete="off"/>
@@ -26,14 +27,14 @@
           Allow time extension
         </div>
       </div>
-      <div id="unblock-typing">
+      <div id="unblock-typing" class="block">
         <span id="typing-prompt"></span>
         <div style="margin-top: 1em">
           <input id="typing-input" type="text" autocomplete="off"></input>
         </div>
         <span id="edit-distance"></span>
       </div>
-      <div id="unblock-confirm">
+      <div id="unblock-confirm" class="block">
         <b>Intention: </b>
         <span id="confirm-intention"></span>
         <br/>
@@ -42,11 +43,12 @@
           <span>If yes, press "</span><span id="unblock-key"></span><span>", otherwise press "n"</span>
         </div>
       </div>
-      <div id="unblock-reason-history">
+      <div id="unblock-reason-history" class="block">
       </div>
     </div>
-    <div id="clock"></div>
+    <div id="clock" class="block"></div>
     <div id="external-content"></div>
+    <script src="/shared.js"></script>
     <script src="/blocked.js"></script>
   </body>
 </html>

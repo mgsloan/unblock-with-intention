@@ -33,3 +33,20 @@ function stripPrefix(prefix, string) {
     return null;
   }
 }
+
+function periodicallyUpdateClock(el) {
+  function doUpdate() {
+    const now = new Date();
+    el.innerText =
+      now.getHours().toString().padStart(2, '0') + ":" +
+      now.getMinutes().toString().padStart(2, '0') + ":" +
+      now.getSeconds().toString().padStart(2, '0');
+    if (now.getHours() > 22 || now.getHours() < 5) {
+      el.classList.add('clock-late');
+    } else {
+      el.classList.remove('clock-late');
+    }
+  }
+  doUpdate();
+  setInterval(doUpdate, 1000);
+}

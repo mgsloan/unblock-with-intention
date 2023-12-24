@@ -34,8 +34,7 @@ function initialize() {
   }
   getExternalContent();
   updateBackground();
-  updateClock();
-  setInterval(updateClock, 1000);
+  periodicallyUpdateClock(clockDiv);
 }
 
 function populatePage() {
@@ -268,18 +267,6 @@ async function updateBackground() {
   document.body.style.backgroundImage = 'url("' + url + '")';
 }
 
-function updateClock() {
-  const now = new Date();
-  clockDiv.innerText =
-    now.getHours().toString().padStart(2, '0') + ":" +
-    now.getMinutes().toString().padStart(2, '0') + ":" +
-    now.getSeconds().toString().padStart(2, '0');
-  if (now.getHours() > 22 || now.getHours() < 5) {
-    clockDiv.classList.add('clock-late');
-  } else {
-    clockDiv.classList.remove('clock-late');
-  }
-}
 
 // https://gist.github.com/andrei-m/982927
 function getEditDistance(a, b){

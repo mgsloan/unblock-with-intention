@@ -10,6 +10,17 @@
   var expiry;
   var startTime;
 
+  const browser = window.browser || window.chrome;
+
+  function addStylesheet(extensionCssPath) {
+    const linkEl = document.createElement('link');
+    linkEl.setAttribute('rel', 'stylesheet');
+    linkEl.setAttribute('href', browser.runtime.getURL(extensionCssPath));
+    document.getElementsByTagName('head')[0].appendChild(linkEl);
+  }
+
+  addStylesheet('shared.css');
+
   // TODO: really should allow renewal of time instead of hard
   // redirect, this could suck if in the middle of something.
   function redirectToBlockPage(redirectPrefix) {
@@ -66,6 +77,7 @@
       const doneButtonDiv = document.createElement('div');
       const extendButtonDiv = document.createElement('div');
       const timerSpan = document.createElement('span');
+      const clockDiv = document.createElement('div');
 
       intentionContainerDiv.style['z-index'] = 2147483647;
       intentionContainerDiv.style.position = 'fixed';
@@ -112,6 +124,11 @@
       extendButtonDiv.style.pointerEvents = 'all';
       extendButtonDiv.style.cursor = 'pointer';
       extendButtonDiv.textContent = 'Extend';
+
+      clockDiv.setAttribute('id', 'clock');
+      clockDiv.setAttribute('class', 'block');
+      clockDiv.style['z-index'] = 2147483647;
+      clockDiv.style.pointerEvents = 'none';
 
       chrome.runtime.sendMessage({ type: 'GET_OPTIONS' }, (options) => {
         if (!options.allowExtend) {
@@ -163,7 +180,10 @@
 
       shadowRoot = shadowDiv.attachShadow({mode: 'closed'});
       shadowRoot.appendChild(intentionContainerDiv);
+      shadowRoot.appendChild(clockDiv);
       document.body.appendChild(shadowRoot);
+
+      periodicallyUpdateClock(clockDiv);
 
       let timer = null;
       const tick = () => {
